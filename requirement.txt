@@ -1,0 +1,4 @@
+colanderalchemy
+SQLAlchemy
+py3o
+openpyxl
