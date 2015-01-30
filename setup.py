@@ -13,10 +13,10 @@ setup(
     version='0.1',
     packages=['sqla_inspect'],
     include_package_data=True,
-    license='BSD License',  # example license
+    license='GPLv3',
     description='Usefull tools for setting/getting datas from SQLAlchemy models',
     long_description=README,
-    url='',
+    url='https://github.com/majerteam/sqla_inspect',
     author='Majerti',
     author_email='tech@majerti.fr',
     install_requires=['SQLAlchemy', 'py3o', 'openpyxl', 'colanderalchemy'],
@@ -25,7 +25,7 @@ setup(
         'Environment :: Web Environment',
         'Framework :: Sqlalchemy',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License', # example license
+        'License :: OSI Approved :: GPLv3',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         # Replace these appropriately if you are stuck on Python 2.
