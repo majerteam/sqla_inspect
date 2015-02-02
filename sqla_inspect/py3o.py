@@ -158,12 +158,16 @@ class SqlaContext(BaseSqlaInspector):
                 # 2- si l'objet lié est plus complexe, on lui fait son propre
                 # chemin
                 # 3- si la relation est uselist, on fait une liste d'élément
-                # liés
+                # liés qu'on place dans une clé "l" et on place l'élément lié
+                # dans une clé portant le nom de son index
                 related = getattr(obj, column['__col__'].key)
                 if column['__col__'].uselist:
-                    value = []
-                    for rel_obj in related:
-                        value.append(column['__prop__'].compile_obj(rel_obj))
+                    value = {'l': []}
+                    for index, rel_obj in enumerate(related):
+                        compiled_res = column['__prop__'].compile_obj(rel_obj)
+                        value[str(index)] = compiled_res
+                        value['l'].append(compiled_res)
+
                 else:
                     value = column['__prop__'].compile_obj(related)
 
