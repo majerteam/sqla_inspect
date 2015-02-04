@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='sqla_inspect',
-    version='0.1',
+    version='0.1.1',
     packages=['sqla_inspect'],
     include_package_data=True,
     license='GPLv3',
