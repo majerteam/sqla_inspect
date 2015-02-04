@@ -19,15 +19,12 @@ setup(
     install_requires=['SQLAlchemy', 'py3o.template', 'openpyxl', 'colanderalchemy'],
     extra_requires={'docs': ['sphinx'], 'test': ['pytest']},
     classifiers=[
-        'Environment :: Database',
-        'Framework :: Sqlalchemy',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GPLv3',
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         # Replace these appropriately if you are stuck on Python 2.
         'Programming Language :: Python :: 2.7',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Topic :: Database',
     ],
 )
