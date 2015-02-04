@@ -2,8 +2,6 @@
 import os
 from setuptools import setup
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
-    README = readme.read()
 
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
@@ -15,14 +13,13 @@ setup(
     include_package_data=True,
     license='GPLv3',
     description='Usefull tools for setting/getting datas from SQLAlchemy models',
-    long_description=README,
     url='https://github.com/majerteam/sqla_inspect',
-    author='Majerti',
+    author='Gaston Tjebbes - Majerti',
     author_email='tech@majerti.fr',
-    install_requires=['SQLAlchemy', 'py3o', 'openpyxl', 'colanderalchemy'],
+    install_requires=['SQLAlchemy', 'py3o.template', 'openpyxl', 'colanderalchemy'],
     extra_requires={'docs': ['sphinx'], 'test': ['pytest']},
     classifiers=[
-        'Environment :: Web Environment',
+        'Environment :: Database',
         'Framework :: Sqlalchemy',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GPLv3',
