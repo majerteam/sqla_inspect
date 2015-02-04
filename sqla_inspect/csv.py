@@ -30,14 +30,19 @@ class CsvWriter(object):
     delimiter = CSV_DELIMITER
     quotechar = CSV_QUOTECHAR
 
-    def render(self):
+    def render(self, f_buf=None):
         """
-            Write to the dest buffer
+        Write to the dest buffer
+
+        :param obj f_buf: A file buffer supporting the write and seek
+        methods
         """
+        if f_buf is None:
+            f_buf = StringIO.StringIO()
+
         headers = getattr(self, 'headers', ())
 
         keys = [force_utf8(header['label']) for header in headers]
-        f_buf = StringIO.StringIO()
         outfile = csv.DictWriter(
             f_buf,
             keys,
@@ -49,6 +54,7 @@ class CsvWriter(object):
         outfile.writeheader()
         _datas = getattr(self, '_datas', ())
         outfile.writerows(_datas)
+        f_buf.seek(0)
         return f_buf
 
     def format_row(self, row):

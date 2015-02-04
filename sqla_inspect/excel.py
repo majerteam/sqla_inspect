@@ -56,13 +56,18 @@ class XlsWriter(object):
         self.worksheet = self.book.active
         self.worksheet.title = self.title
 
-    def save_book(self):
+    def save_book(self, f_buf=None):
         """
         Return a file buffer containing the resulting xls
+
+        :param obj f_buf: A file buffer supporting the write and seek
+        methods
         """
-        buf = StringIO.StringIO()
-        buf.write(openpyxl.writer.excel.save_virtual_workbook(self.book))
-        return buf
+        if f_buf is None:
+            f_buf = StringIO.StringIO()
+        f_buf.write(openpyxl.writer.excel.save_virtual_workbook(self.book))
+        f_buf.seek(0)
+        return f_buf
 
     def set_color(self, cell, color):
         """
@@ -91,14 +96,17 @@ class XlsWriter(object):
             res.append(value)
         return res
 
-    def render(self):
+    def render(self, f_buf=None):
         """
         Definitely render the workbook
+
+        :param obj f_buf: A file buffer supporting the write and seek
+        methods
         """
         self._render_headers()
         self._render_rows()
 
-        return self.save_book()
+        return self.save_book(f_buf)
 
 
     def _render_rows(self):
