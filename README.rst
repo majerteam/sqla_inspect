@@ -20,6 +20,6 @@ Documentation
 
 Documentation is now available on readthedocs.org
 
-`http://sqla-inspect.readthedocs.org/en/latest/`_
+http://sqla-inspect.readthedocs.org/en/latest/
 
 
