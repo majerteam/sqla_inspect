@@ -68,12 +68,6 @@ def format_value(column_dict, value, key=None):
     :param value: A value coming from the database
     :param key: The exportation key
     """
-    if column_dict['name'] == 'created_at':
-        print("Formatting a value")
-        print(value)
-
-        print FORMATTERS_REGISTRY
-
     formatter = column_dict.get('formatter')
     prop = column_dict['__col__']
 
