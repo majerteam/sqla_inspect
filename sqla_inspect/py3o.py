@@ -40,7 +40,7 @@ def format_py3o_val(value):
 
     * Handle linebreaks
     """
-    return Markup(unicode(value).replace('\n', '<text:line-break/>'))
+    return Markup(unicode(value).replace(u'\n', u'<text:line-break/>'))
 
 
 class SqlaContext(BaseSqlaInspector):
