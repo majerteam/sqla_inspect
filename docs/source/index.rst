@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    export.rst
+   sqla_inspect.rst
 
 
 
