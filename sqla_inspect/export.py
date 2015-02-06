@@ -7,7 +7,6 @@
 Base export class
 """
 
-from sqlalchemy import inspect
 from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
@@ -98,14 +97,16 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
 
         config_key
 
-            The key in the export subdict in the sqlalchemy Column's info dict that is used to
-            configure this export
-            e.g : set config_key = "csv" if your column configuration looks like
-            the following:
-            Column(Integer, info={'export' :
-                {'csv': {<config>}},
-                    <main_export_config>
-                }
+            The key in the export subdict in the sqlalchemy Column's info dict
+            that is used to configure this export e.g : set config_key = "csv"
+            if your column configuration looks like the following
+
+            .. code-block:: python
+
+                Column(Integer, info={'export' :
+                    {'csv': {<config>}},
+                        <main_export_config>
+                    }
 
         .. note::
 
@@ -119,6 +120,44 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
         BaseSqlaInspector.__init__(self, model)
         self.headers = self._collect_headers()
 
+    def _is_excluded(self, prop, info_dict):
+        """
+        Check if the given prop should be excluded from the export
+        """
+        if prop.key in BLACKLISTED_KEYS:
+            return True
+
+        if info_dict.get('exclude', False):
+            return True
+
+        return False
+
+
+    def _get_title(self, prop, main_infos, info_dict):
+        """
+        Return the title configured as in colanderalchemy
+        """
+        result = main_infos.get('label')
+        if result is None:
+            result = info_dict.get('colanderalchemy', {}).get('title')
+        if result is None:
+            result = prop.key
+        return result
+
+    def _get_prop_infos(self, prop):
+        """
+        Return the infos configured for this specific prop, merging the
+        different configuration level
+        """
+        info_dict = self.get_info_field(prop)
+        main_infos = info_dict.get('export', {}).copy()
+        infos = main_infos.get(self.config_key, {})
+        main_infos['label'] = self._get_title(prop, main_infos, info_dict)
+        main_infos['name'] = prop.key
+        main_infos.update(infos)
+        main_infos['__col__'] = prop
+        return main_infos
+
     def _collect_headers(self):
         """
         Collect headers from the models attribute info col
@@ -127,35 +166,15 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
 
         for prop in self.get_sorted_columns():
 
-            if prop.key in BLACKLISTED_KEYS:
+            main_infos = self._get_prop_infos(prop)
+
+            if self._is_excluded(prop, main_infos):
                 continue
-
-            info_dict = self.get_info_field(prop)
-            main_infos = info_dict.get('export', {}).copy()
-
-            infos = main_infos.get(self.config_key, {})
-
-            if infos.get('exclude', False) or main_infos.get('exclude', False):
-                continue
-
-            # By default, we use colanderalchemy's way of configuring titles
-            title = info_dict.get('colanderalchemy', {}).get('title')
-
-            if title is not None and not main_infos.has_key('label'):
-                main_infos['label'] = title
-
-            main_infos.setdefault('label', prop.key)
-
-            main_infos['name'] = prop.key
-
-            main_infos.update(infos)
-
-            # We keep the original prop in case it's usefull
-            main_infos['__col__'] = prop
 
             if isinstance(prop, RelationshipProperty):
                 main_infos = self._collect_relationship(main_infos, prop, res)
-                if not main_infos or not main_infos.has_key('related_key'):
+
+                if not main_infos:
                     # If still no success, we forgot this one
                     print("Maybe there's missing some informations \
 about a relationship")
@@ -164,19 +183,28 @@ about a relationship")
                 main_infos = self._merge_many_to_one_field_from_fkey(
                     main_infos, prop, res
                 )
-                if main_infos is None:
+                if not main_infos:
                     continue
 
-            res.append(main_infos)
+            if isinstance(main_infos, (list, tuple)):
+                # In case _collect_relationship returned a list
+                res.extend(main_infos)
+            else:
+                res.append(main_infos)
         return res
 
     def _collect_relationship(self, main_infos, prop, result):
         """
         collect a relationship header:
-            * remove onetomany relationship
-            * merge foreignkeys with associated manytoone rel if we were able to
-                find an attribute that will represent the destination model
-                (generally a label of a configurable option)
+
+        * One To many TODO
+        * Many To One :
+
+            If a related_key is provided, we remove the associated foreign key
+            from the output (we collect its associated title) and only the given
+            key of the associated object will be exported
+            If no related_key is provided, we use the relationship's title as
+            prefix and for each attribute of the related object, we add a column
 
         :param dict main_infos: The already collected datas about this column
         :param obj prop: The property mapper of the relationship
@@ -184,28 +212,40 @@ about a relationship")
         :returns: a dict with the datas matching this header
         """
         # No handling of the uselist relationships for the moment
+        # Maybe with indexes ? ( to see: on row add, append headers on the fly
+        # if needed )
         if prop.uselist:
-            main_infos = None
+            main_infos = {}
         else:
-            related_field_inspector = inspect(prop.mapper)
+            if main_infos.has_key('related_key'):
+                self._merge_many_to_one_field(main_infos, prop, result)
+            else:
+                related_field_inspector = BaseSqlaInspector(prop.mapper)
+                main_infos_list = []
 
-            self._merge_many_to_one_field(main_infos, prop, result)
+                for column in related_field_inspector.get_columns_only():
+                    infos = self._get_prop_infos(column)
+                    if self._is_excluded(column, infos):
+                        continue
 
-            if not main_infos.has_key('related_key'):
-                # If one of those keys exists in the corresponding
-                # option, we use it as reference key
-                for rel_key in ('label', 'name', 'title'):
-                    if related_field_inspector.attrs.has_key(rel_key):
-                        main_infos['related_key'] = rel_key
-                        break
+                    infos['label'] = u"%s %s" % (
+                        main_infos['label'], infos['label']
+                    )
+                    infos['__col__'] = main_infos['__col__']
+                    infos['name'] = main_infos['name']
+                    infos['related_key'] = column.key
+                    main_infos_list.append(infos)
+                return main_infos_list
+
         return main_infos
 
     def _merge_many_to_one_field(self, main_infos, prop, result):
         """
-        Find the associated id foreignkey and get the title from it
-        Remove this fkey field from the export
+        * Find the foreignkey associated to the current relationship
+        * Get its title
+        * Remove this fkey field from the export
 
-        :param dict main_infos: The already collected datas about this column
+        :param dict main_infos: The datas collected about the relationship
         :param obj prop: The property mapper of the relationship
         :param list result: The actual collected headers
         :returns: a title
@@ -276,12 +316,13 @@ about a relationship")
         Return the value to insert in a relationship cell
         """
         name = column['name']
-        related_key = column.get('related_key', 'label')
+        related_key = column.get('related_key')
 
         related_obj = getattr(obj, name, None)
 
         if related_obj is None:
             return ""
+
         if column['__col__'].uselist: # OneToMany
             _vals = []
             for rel_obj in related_obj:
@@ -290,7 +331,8 @@ about a relationship")
                 )
             val = '\n'.join(_vals)
         else:
-            val = self._get_formatted_val(related_obj, related_key, column)
+            if related_key is not None:
+                val = self._get_formatted_val(related_obj, related_key, column)
 
         return val
 
