@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='sqla_inspect',
     version='0.1.2',
-    packages=['sqla_inspect'],
+    packages=['sqla_inspect', 'unidecode'],
     include_package_data=True,
     license='GPLv3',
     description='Usefull tools for setting/getting datas from SQLAlchemy models',
