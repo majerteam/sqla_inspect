@@ -143,3 +143,11 @@ class CsvExporter(CsvWriter, BaseExporter):
     def __init__(self):
         CsvWriter.__init__(self)
         BaseExporter.__init__(self)
+
+
+def get_csv_reader(csv_buffer, delimiter=CSV_DELIMITER, quotechar=CSV_QUOTECHAR):
+    return csv.DictReader(
+            csv_buffer,
+            delimiter=delimiter,
+            quotechar=quotechar,
+        )

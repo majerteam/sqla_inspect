@@ -7,6 +7,7 @@
     Provide common tools for string handling
 """
 import re
+import unidecode
 import random
 from string import lowercase
 
@@ -16,12 +17,15 @@ def force_ascii(datas):
         Return enforced ascii string
         éko=>ko
     """
-    return "".join((i for i in datas if ord(i) < 128))
+    if isinstance(datas, unicode):
+        return unidecode.unidecode(datas)
+    else:
+        return unidecode.unidecode(force_unicode(datas))
 
 
 def force_utf8(value):
     """
-        return a utf-8 string
+    return an utf-8 string
     """
     if isinstance(value, unicode):
         value = value.encode('utf-8')

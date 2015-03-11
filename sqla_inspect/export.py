@@ -154,6 +154,7 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
         infos = main_infos.get(self.config_key, {})
         main_infos['label'] = self._get_title(prop, main_infos, info_dict)
         main_infos['name'] = prop.key
+        main_infos['key'] = prop.key
         main_infos.update(infos)
         main_infos['__col__'] = prop
         return main_infos
@@ -232,7 +233,8 @@ about a relationship")
                         main_infos['label'], infos['label']
                     )
                     infos['__col__'] = main_infos['__col__']
-                    infos['name'] = main_infos['name']
+                    infos['name'] = "%s %s" % (main_infos['name'], column.key)
+                    infos['key'] = main_infos['key']
                     infos['related_key'] = column.key
                     main_infos_list.append(infos)
                 return main_infos_list
@@ -315,10 +317,10 @@ about a relationship")
         """
         Return the value to insert in a relationship cell
         """
-        name = column['name']
+        key = column['key']
         related_key = column.get('related_key')
 
-        related_obj = getattr(obj, name, None)
+        related_obj = getattr(obj, key, None)
 
         if related_obj is None:
             return ""
