@@ -9,14 +9,14 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='sqla_inspect',
     version='0.1.2',
-    packages=['sqla_inspect', 'unidecode'],
+    packages=['sqla_inspect'],
     include_package_data=True,
     license='GPLv3',
     description='Usefull tools for setting/getting datas from SQLAlchemy models',
     url='https://github.com/majerteam/sqla_inspect',
     author='Gaston Tjebbes - Majerti',
     author_email='tech@majerti.fr',
-    install_requires=['SQLAlchemy', 'py3o.template', 'openpyxl', 'colanderalchemy'],
+    install_requires=['SQLAlchemy', 'py3o.template', 'openpyxl', 'colanderalchemy', 'unidecode'],
     extra_requires={'docs': ['sphinx'], 'test': ['pytest']},
     classifiers=[
         'Intended Audience :: Developers',
