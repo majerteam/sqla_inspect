@@ -76,6 +76,14 @@ class CsvWriter(object):
             res_dict[label] = force_utf8(val)
         return res_dict
 
+    def set_headers(self, headers):
+        """
+        Set the headers of our csv writer
+        :param list headers: list of dict with label and name key (label is
+        mandatory : used for the export)
+        """
+        self.headers = headers
+
 
 class SqlaCsvExporter(CsvWriter, SqlaExporter):
     """
