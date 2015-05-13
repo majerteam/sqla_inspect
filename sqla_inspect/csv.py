@@ -71,6 +71,7 @@ class CsvWriter(object):
         for header in headers:
             name, label = header['name'], header['label']
             val = row.get(name, '')
+            label = force_utf8(label)
             if hasattr(self, "format_%s" % name):
                 val = getattr(self, "format_%s" % name)(val)
             res_dict[label] = force_utf8(val)
@@ -153,9 +154,10 @@ class CsvExporter(CsvWriter, BaseExporter):
         BaseExporter.__init__(self)
 
 
-def get_csv_reader(csv_buffer, delimiter=CSV_DELIMITER, quotechar=CSV_QUOTECHAR):
+def get_csv_reader(csv_buffer, delimiter=CSV_DELIMITER,
+                   quotechar=CSV_QUOTECHAR):
     return csv.DictReader(
-            csv_buffer,
-            delimiter=delimiter,
-            quotechar=quotechar,
-        )
+        csv_buffer,
+        delimiter=delimiter,
+        quotechar=quotechar,
+    )
