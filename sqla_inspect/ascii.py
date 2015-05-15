@@ -12,21 +12,25 @@ import random
 from string import lowercase
 
 
-def force_ascii(datas):
+def force_ascii(value):
     """
         Return enforced ascii string
         éko=>ko
     """
-    if isinstance(datas, unicode):
-        return unidecode.unidecode(datas)
+    if not isinstance(value, (str, unicode)):
+        return unicode(value)
+    if isinstance(value, unicode):
+        return unidecode.unidecode(value)
     else:
-        return unidecode.unidecode(force_unicode(datas))
+        return unidecode.unidecode(force_unicode(value))
 
 
 def force_utf8(value):
     """
     return an utf-8 string
     """
+    if not isinstance(value, (str, unicode)):
+        value = str(value)
     if isinstance(value, unicode):
         value = value.encode('utf-8')
     return value
@@ -36,6 +40,12 @@ def force_unicode(value):
     """
     return an utf-8 unicode entry
     """
+    print(type(value))
+    if not isinstance(value, (str, unicode)):
+        print("It's not a string like object")
+        value = unicode(value)
+    else:
+        print("It's a string like object")
     if isinstance(value, str):
         value = value.decode('utf-8')
     return value
@@ -45,7 +55,8 @@ def camel_case_to_name(name):
     """
     Used to convert a classname to a lowercase name
     """
-    convert_func = lambda m:"_" + m.group(0).lower()
+    def convert_func(val):
+        return "_" + val.group(0).lower()
     return name[0].lower() + re.sub(r'([A-Z])', convert_func, name[1:])
 
 

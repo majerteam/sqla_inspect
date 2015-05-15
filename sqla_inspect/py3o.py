@@ -18,10 +18,6 @@ from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
-from sqlalchemy import (
-    Date,
-    DateTime,
-)
 from genshi.core import Markup
 
 from py3o.template import Template
@@ -32,6 +28,9 @@ from sqla_inspect.base import (
 from sqla_inspect.export import (
     format_value,
 )
+from sqla_inspect.ascii import (
+    force_unicode,
+)
 
 
 def format_py3o_val(value):
@@ -40,7 +39,7 @@ def format_py3o_val(value):
 
     * Handle linebreaks
     """
-    return Markup(unicode(value).replace(u'\n', u'<text:line-break/>'))
+    return Markup(force_unicode(value).replace(u'\n', u'<text:line-break/>'))
 
 
 class SqlaContext(BaseSqlaInspector):
@@ -112,9 +111,9 @@ class SqlaContext(BaseSqlaInspector):
 
             main_infos = export_infos.get(self.config_key, {}).copy()
 
-            if export_infos.get('exclude', False) or main_infos.get('exclude',
-                                                                    False):
-                continue
+            if export_infos.get('exclude'):
+                if main_infos.get('exclude', True):
+                    continue
 
             infos = export_infos
             infos.update(main_infos)
