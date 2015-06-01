@@ -40,6 +40,8 @@ def force_encoding(value, encoding='utf-8'):
         value = str(value)
     if isinstance(value, unicode):
         value = value.encode(encoding)
+    elif encoding != 'utf-8':
+        value = value.decode('utf-8').encode(encoding)
     return value
 
 
