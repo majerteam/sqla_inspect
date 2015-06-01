@@ -128,9 +128,13 @@ class SqlaCsvExporter(CsvWriter, SqlaExporter):
 
             This data will not be inserted in the export if True
 
+        encoding
+
+            The encoding of the csv output
+
     Usage:
 
-        a = SqlaCsvWriter(MyModel)
+        a = SqlaCsvWriter(MyModel, encoding='utf-8')
         for i in MyModel.query().filter(<myfilter>):
             a.add_row(i)
         a.render()
@@ -153,7 +157,7 @@ class CsvExporter(CsvWriter, BaseExporter):
     class MyCsvExporter(CsvExporter):
         headers = ({'name': 'key', 'label': u'Ma colonne 1'}, ...)
 
-    writer = MyCsvExporter()
+    writer = MyCsvExporter(encoding='utf-8')
     writer.add_row({'key': u'La valeur de la cellule de la colonne 1'})
     writer.render()
     """
