@@ -29,10 +29,17 @@ def force_utf8(value):
     """
     return an utf-8 string
     """
+    return force_encoding(value)
+
+
+def force_encoding(value, encoding='utf-8'):
+    """
+    Return a string encoded in the provided encoding
+    """
     if not isinstance(value, (str, unicode)):
         value = str(value)
     if isinstance(value, unicode):
-        value = value.encode('utf-8')
+        value = value.encode(encoding)
     return value
 
 
