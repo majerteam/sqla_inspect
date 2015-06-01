@@ -28,7 +28,8 @@ class BaseExporter():
     Should be used in conjunction with a writer
     """
     headers = []
-    def __init__(self):
+
+    def __init__(self, **kw):
         self._datas = []
 
     @staticmethod
@@ -132,7 +133,6 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
 
         return False
 
-
     def _get_title(self, prop, main_infos, info_dict):
         """
         Return the title configured as in colanderalchemy
@@ -218,7 +218,7 @@ about a relationship")
         if prop.uselist:
             main_infos = {}
         else:
-            if main_infos.has_key('related_key'):
+            if "related_key" in main_infos:
                 self._merge_many_to_one_field(main_infos, prop, result)
             else:
                 related_field_inspector = BaseSqlaInspector(prop.mapper)
@@ -281,7 +281,7 @@ about a relationship")
             for val in result:
                 if val["name"] == rel_name:
                     val["label"] = main_infos['label']
-                    main_infos = None # We can forget this field in export
+                    main_infos = None  # We can forget this field in export
                     break
         return main_infos
 
@@ -325,7 +325,7 @@ about a relationship")
         if related_obj is None:
             return ""
 
-        if column['__col__'].uselist: # OneToMany
+        if column['__col__'].uselist:  # OneToMany
             _vals = []
             for rel_obj in related_obj:
                 _vals.append(

@@ -12,7 +12,7 @@ from __future__ import absolute_import
 import csv
 import cStringIO as StringIO
 
-from sqla_inspect.ascii import force_utf8
+from sqla_inspect.ascii import force_encoding
 from sqla_inspect.export import (
     BaseExporter,
     SqlaExporter,
@@ -29,6 +29,13 @@ class CsvWriter(object):
     """
     delimiter = CSV_DELIMITER
     quotechar = CSV_QUOTECHAR
+    default_encoding = 'utf-8'
+
+    def __init__(self, **kw):
+        if 'encoding' in kw:
+            self.encoding = kw['encoding']
+        else:
+            self.encoding = self.default_encoding
 
     def render(self, f_buf=None):
         """
@@ -42,7 +49,10 @@ class CsvWriter(object):
 
         headers = getattr(self, 'headers', ())
 
-        keys = [force_utf8(header['label']) for header in headers]
+        keys = [
+            force_encoding(header['label'], self.encoding)
+            for header in headers
+        ]
         outfile = csv.DictWriter(
             f_buf,
             keys,
@@ -71,10 +81,10 @@ class CsvWriter(object):
         for header in headers:
             name, label = header['name'], header['label']
             val = row.get(name, '')
-            label = force_utf8(label)
+            label = force_encoding(label, self.encoding)
             if hasattr(self, "format_%s" % name):
                 val = getattr(self, "format_%s" % name)(val)
-            res_dict[label] = force_utf8(val)
+            res_dict[label] = force_encoding(val, self.encoding)
         return res_dict
 
     def set_headers(self, headers):
@@ -130,8 +140,8 @@ class SqlaCsvExporter(CsvWriter, SqlaExporter):
     """
     config_key = 'csv'
 
-    def __init__(self, model):
-        CsvWriter.__init__(self)
+    def __init__(self, model, **kw):
+        CsvWriter.__init__(self, **kw)
         SqlaExporter.__init__(self, model)
 
 
@@ -149,9 +159,9 @@ class CsvExporter(CsvWriter, BaseExporter):
     """
     headers = ()
 
-    def __init__(self):
-        CsvWriter.__init__(self)
-        BaseExporter.__init__(self)
+    def __init__(self, **kw):
+        CsvWriter.__init__(self, **kw)
+        BaseExporter.__init__(self, **kw)
 
 
 def get_csv_reader(csv_buffer, delimiter=CSV_DELIMITER,
