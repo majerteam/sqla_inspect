@@ -165,6 +165,7 @@ class SqlaContext(BaseSqlaInspector):
                     for index, rel_obj in enumerate(related):
                         compiled_res = column['__prop__'].compile_obj(rel_obj)
                         value[str(index)] = compiled_res
+                        value["_" + str(index)] = compiled_res
                         value['l'].append(compiled_res)
 
                 else:
