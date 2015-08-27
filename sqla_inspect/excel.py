@@ -118,7 +118,6 @@ class XlsWriter(object):
             row_number = index + 2
             for col_num, value in enumerate(row):
                 cell = self.worksheet.cell(row=row_number, column=col_num + 1)
-                print("Writing a cell with the following value : %s" % value)
                 cell.value = value
 
     def _render_headers(self):
