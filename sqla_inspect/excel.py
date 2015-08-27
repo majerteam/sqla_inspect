@@ -51,8 +51,8 @@ class XlsWriter(object):
 
     """
     title = u"Export"
-    def __init__(self):
-        self.book = openpyxl.workbook.Workbook()
+    def __init__(self, guess_types=True):
+        self.book = openpyxl.workbook.Workbook(guess_types=guess_types)
         self.worksheet = self.book.active
         self.worksheet.title = self.title
 
@@ -118,6 +118,7 @@ class XlsWriter(object):
             row_number = index + 2
             for col_num, value in enumerate(row):
                 cell = self.worksheet.cell(row=row_number, column=col_num + 1)
+                print("Writing a cell with the following value : %s" % value)
                 cell.value = value
 
     def _render_headers(self):
@@ -170,8 +171,8 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
         a.render()
     """
     config_key = 'excel'
-    def __init__(self, model):
-        XlsWriter.__init__(self)
+    def __init__(self, model, guess_types=True):
+        XlsWriter.__init__(self, guess_types)
         SqlaExporter.__init__(self, model)
 
 
@@ -185,6 +186,6 @@ class XlsExporter(XlsWriter, BaseExporter):
     """
     headers = ()
 
-    def __init__(self):
-        XlsWriter.__init__(self)
+    def __init__(self, guess_types=True):
+        XlsWriter.__init__(self, guess_types=True)
         BaseExporter.__init__(self)
