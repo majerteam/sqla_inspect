@@ -15,7 +15,7 @@ from sqla_inspect.base import (
     BaseSqlaInspector,
     FormatterRegistry,
 )
-BLACKLISTED_KEYS = ()
+BLACKLISTED_KEYS = []
 
 
 # Should be completed (to see how this will be done)
@@ -216,7 +216,8 @@ about a relationship")
         # Maybe with indexes ? ( to see: on row add, append headers on the fly
         # if needed )
         if prop.uselist:
-            main_infos = {}
+            # One to many
+            pass
         else:
             if "related_key" in main_infos:
                 self._merge_many_to_one_field(main_infos, prop, result)
@@ -256,12 +257,13 @@ about a relationship")
         # We first find the related foreignkey to get the good title
         rel_base = list(prop.local_columns)[0]
         related_fkey_name = rel_base.name
-        for val in result:
-            if val['name'] == related_fkey_name:
-                title = val['label']
-                main_infos['label'] = title
-                result.remove(val)
-                break
+        if not main_infos.get('keep_key', False):
+            for val in result:
+                if val['name'] == related_fkey_name:
+                    title = val['label']
+                    main_infos['label'] = title
+                    result.remove(val)
+                    break
 
         return main_infos
 
@@ -317,8 +319,9 @@ about a relationship")
         """
         Return the value to insert in a relationship cell
         """
+        val = ""
         key = column['key']
-        related_key = column.get('related_key')
+        related_key = column.get('related_key', None)
 
         related_obj = getattr(obj, key, None)
 
@@ -326,12 +329,13 @@ about a relationship")
             return ""
 
         if column['__col__'].uselist:  # OneToMany
-            _vals = []
-            for rel_obj in related_obj:
-                _vals.append(
-                    self._get_formatted_val(rel_obj, related_key, column)
-                )
-            val = '\n'.join(_vals)
+            if related_key is not None:
+                _vals = []
+                for rel_obj in related_obj:
+                    _vals.append(
+                        self._get_formatted_val(rel_obj, related_key, column)
+                    )
+                val = '\n'.join(_vals)
         else:
             if related_key is not None:
                 val = self._get_formatted_val(related_obj, related_key, column)

@@ -56,9 +56,32 @@ class BaseSqlaInspector(object):
         return column.info
 
 
-class FormatterRegistry(dict):
+class Registry(dict):
     """
-    A registry used to store sqla columns <-> formatters association
+    A registry used to store sqla columns <-> datas association
+    """
+    def add_item(self, sqla_col_type, item, key_specific=None):
+        """
+        Add an item to the registry
+        """
+        if key_specific is not None:
+            self.setdefault(key_specific, {})[sqla_col_type] = item
+        else:
+            self[sqla_col_type] = item
+
+    def get_item(self, sqla_col, key_specific=None):
+        item = None
+        if key_specific is not None:
+            item = self.get(key_specific, {}).get(sqla_col.__class__)
+
+        if item is None:
+            item = self.get(sqla_col.__class__)
+
+        return item
+
+class FormatterRegistry(Registry):
+    """
+    Registry specific to formatters
     """
     def add_formatter(self, sqla_col_type, formatter, key_specific=None):
         """
@@ -66,18 +89,10 @@ class FormatterRegistry(dict):
         if key_specific is provided, this formatter will only be used for some
         specific exports
         """
-        if key_specific is not None:
-            self.setdefault(key_specific, {})[sqla_col_type] = formatter
-        else:
-            self[sqla_col_type] = formatter
+        self.add_item(sqla_col_type, formatter, key_specific)
 
     def get_formatter(self, sqla_col, key_specific=None):
-        formatter = None
-        if key_specific is not None:
-            formatter = self.get(key_specific, {}).get(sqla_col.__class__)
-
-        if formatter is None:
-            formatter = self.get(sqla_col.__class__)
-
-        return formatter
-
+        """
+        Returns a formatter stored in the registry
+        """
+        return self.get_item(sqla_col, key_specific)
