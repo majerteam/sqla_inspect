@@ -49,12 +49,8 @@ def force_unicode(value):
     """
     return an utf-8 unicode entry
     """
-    print(type(value))
     if not isinstance(value, (str, unicode)):
-        print("It's not a string like object")
         value = unicode(value)
-    else:
-        print("It's a string like object")
     if isinstance(value, str):
         value = value.decode('utf-8')
     return value
