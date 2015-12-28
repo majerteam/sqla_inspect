@@ -162,9 +162,9 @@ def get_cell_format(column_dict, key=None):
     :param key: The exportation key
     """
     format = column_dict.get('format')
-    prop = column_dict['__col__']
+    prop = column_dict.get('__col__')
 
-    if format is None:
+    if format is None and prop is not None:
         if hasattr(prop, 'columns'):
             sqla_column = prop.columns[0]
             column_type = getattr(sqla_column.type, 'impl', sqla_column.type)
