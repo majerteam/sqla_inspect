@@ -11,8 +11,9 @@ def test_collect_keys():
     from sqla_inspect.tests.models import (Parent, Child)
 
     exporter = export.SqlaExporter(Parent)
-    assert len(exporter.headers) == 2
+    assert len(exporter.headers) == 3
     assert exporter.headers[0]['name'] == 'id'
+    assert exporter.headers[2]['name'] == 'children'
 
     exporter = export.SqlaExporter(Child)
     assert len(exporter.headers) == 6
