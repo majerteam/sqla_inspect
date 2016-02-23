@@ -35,6 +35,8 @@ class BaseExporter():
 
     def __init__(self, **kw):
         self._datas = []
+        if "headers" in kw:
+            self.headers = kw['headers']
 
     @staticmethod
     def format_row(row):
