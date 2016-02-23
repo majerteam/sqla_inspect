@@ -149,8 +149,8 @@ class SqlaOdsExporter(OdsWriter, SqlaExporter):
     """
     config_key = 'ods'
 
-    def __init__(self, model, title=None):
-        self.is_root = title is not None
+    def __init__(self, model, is_root=True, title=None):
+        self.is_root = is_root
         OdsWriter.__init__(self, title=title)
         SqlaExporter.__init__(self, model)
 
@@ -163,6 +163,7 @@ class SqlaOdsExporter(OdsWriter, SqlaExporter):
         if result is None:
             result = column['sqla_ods_exporter'] = SqlaOdsExporter(
                 related_obj.__class__,
+                is_root=False,
                 title=column.get('label', column['key']),
             )
             self.add_sheet(result)
