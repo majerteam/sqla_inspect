@@ -16,7 +16,7 @@ setup(
     url='https://github.com/majerteam/sqla_inspect',
     author='Gaston Tjebbes - Majerti',
     author_email='tech@majerti.fr',
-    install_requires=['SQLAlchemy', 'py3o.template', 'openpyxl', 'colanderalchemy', 'unidecode'],
+    install_requires=['SQLAlchemy', 'py3o.template', 'openpyxl', 'colanderalchemy', 'unidecode', 'odswriter'],
     extra_requires={'docs': ['sphinx'], 'test': ['pytest']},
     classifiers=[
         'Intended Audience :: Developers',
