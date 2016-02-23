@@ -21,24 +21,6 @@ log = logging.getLogger(__name__)
 FORMAT_REGISTRY = Registry()
 
 
-class Book(object):
-    def __init__(self):
-        self.sheets = []
-        self.default_sheet = Sheet(name='default')
-
-    @property
-    def active(self):
-        return self.default_sheet
-
-    def create_sheet(self, title):
-        return Sheet(title)
-
-
-class Sheet(object):
-    def __init__(self, title):
-        self.title = title
-
-
 class OdsWriter(object):
     """
     Class providing common tools to write ods files from tabular datas
@@ -122,6 +104,9 @@ class OdsWriter(object):
         :param obj sheet_object: A sheet object added to the current workbook
         """
         self.sheets.append(sheet_object)
+
+    def set_title(self, title):
+        self.title = title
 
 
 class SqlaOdsExporter(OdsWriter, SqlaExporter):

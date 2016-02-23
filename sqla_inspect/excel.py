@@ -153,6 +153,9 @@ class XlsWriter(object):
             cell = self.worksheet.cell(row=1, column=index + 1)
             cell.value = col['label']
 
+    def set_title(self, title):
+        self.worksheet.title = title
+
 
 def get_cell_format(column_dict, key=None):
     """
@@ -218,7 +221,6 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
         XlsWriter.__init__(self, guess_types, worksheet)
         SqlaExporter.__init__(self, model)
 
-
     def _get_related_exporter(self, related_obj, column):
         """
         returns an SqlaXlsExporter for the given related object and stores it in
@@ -244,7 +246,8 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
         if val == "":
             related_key = column.get('related_key', None)
 
-            if column['__col__'].uselist and related_key is None and self.is_root:
+            if column['__col__'].uselist and related_key is None \
+                    and self.is_root:
 
                 # on récupère les objets liés
                 key = column['key']
