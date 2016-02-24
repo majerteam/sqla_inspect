@@ -208,5 +208,5 @@ class OdsExporter(OdsWriter, BaseExporter):
     headers = ()
 
     def __init__(self, title=None, **kw):
-        OdsWriter.__init__(self, title)
+        OdsWriter.__init__(self, title, **kw)
         BaseExporter.__init__(self, **kw)

@@ -218,8 +218,8 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
     def __init__(self, model, guess_types=True, worksheet=None):
         self.guess_types = guess_types
         self.is_root = worksheet is None
-        XlsWriter.__init__(self, guess_types, worksheet)
-        SqlaExporter.__init__(self, model)
+        XlsWriter.__init__(self, guess_types=guess_types, worksheet=worksheet)
+        SqlaExporter.__init__(self, model=model)
 
     def _get_related_exporter(self, related_obj, column):
         """
@@ -284,6 +284,10 @@ class XlsExporter(XlsWriter, BaseExporter):
     """
     headers = ()
 
-    def __init__(self, guess_types=True):
-        XlsWriter.__init__(self, guess_types=True)
-        BaseExporter.__init__(self)
+    def __init__(self, guess_types=True, **kw):
+        XlsWriter.__init__(
+            self,
+            guess_types=guess_types,
+            **kw
+        )
+        BaseExporter.__init__(self, **kw)
