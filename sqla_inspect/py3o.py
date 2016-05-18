@@ -14,6 +14,8 @@ Py3o exporters
 from __future__ import absolute_import
 from cStringIO import StringIO
 
+from xml.sax.saxutils import escape
+
 from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
