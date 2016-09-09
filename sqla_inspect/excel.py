@@ -103,6 +103,8 @@ class XlsWriter(object):
         for column in headers:
             column_name = column['name']
             value = row.get(column_name, '')
+            if hasattr(self, "format_%s" % column_name):
+                value = getattr(self, "format_%s" % name)(value)
             res.append(value)
         return res
 
