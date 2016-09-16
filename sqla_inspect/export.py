@@ -37,6 +37,7 @@ class BaseExporter():
         self._datas = []
         if "headers" in kw:
             self.headers = kw['headers']
+        self.extra_headers = []
 
     @staticmethod
     def format_row(row):
@@ -63,6 +64,22 @@ class BaseExporter():
         Render the datas as a file buffer
         """
         raise NotImplementedError()
+
+    def add_extra_header(self, header_dict):
+        """
+        Add extra headers that allow to pass non sqlalchemy datas when
+        populating
+        """
+        self.extra_headers.append(header_dict)
+
+    def add_extra_datas(self, extra_datas):
+        """
+        Add extra datas to the last row
+
+        :param list extra_datas: A list of formatted datas
+        """
+        for data in extra_datas:
+            self._datas[-1].append(data)
 
 
 def format_value(column_dict, value, key=None):
@@ -368,7 +385,7 @@ about a relationship")
                             )
                         )
                     val = '\n'.join(_vals)
-        else: # Many to One
+        else:  # Many to One
             if related_key is not None:
                 val = self._get_formatted_val(related_obj, related_key, column)
 

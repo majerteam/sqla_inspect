@@ -53,6 +53,13 @@ class CsvWriter(object):
             force_encoding(header['label'], self.encoding)
             for header in headers
         ]
+
+        extra_headers = getattr(self, 'extra_headers', ())
+        keys.extend([
+            force_encoding(header['label'], self.encoding)
+            for header in extra_headers
+        ])
+
         outfile = csv.DictWriter(
             f_buf,
             keys,
@@ -94,6 +101,14 @@ class CsvWriter(object):
         mandatory : used for the export)
         """
         self.headers = headers
+
+    def add_extra_datas(self, extra_datas):
+        """
+        Add extra datas to the last row
+
+        :param dict extra_datas: A dict {header_name: value, ...}
+        """
+        self._datas[-1].update(extra_datas)
 
 
 class SqlaCsvExporter(CsvWriter, SqlaExporter):

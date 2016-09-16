@@ -140,10 +140,11 @@ class XlsWriter(object):
                     cell.value = value
                 else:
                     cell.value = ""
-                header = headers[col_num]
-                format = get_cell_format(header)
-                if format is not None:
-                    cell.number_format = format
+                if len(headers) > col_num:
+                    header = headers[col_num]
+                    format = get_cell_format(header)
+                    if format is not None:
+                        cell.number_format = format
 
     def _render_headers(self):
         """
@@ -153,6 +154,13 @@ class XlsWriter(object):
         for index, col in enumerate(headers):
             # We write the headers
             cell = self.worksheet.cell(row=1, column=index + 1)
+            cell.value = col['label']
+
+        index += 1
+
+        extra_headers = getattr(self, 'extra_headers', ())
+        for add_index, col in enumerate(extra_headers):
+            cell = self.worksheet.cell(row=1, column=add_index + index + 1)
             cell.value = col['label']
 
     def set_title(self, title):

@@ -95,6 +95,8 @@ class OdsWriter(object):
         """
         headers = getattr(self, 'headers', ())
         labels = [header['label'] for header in headers]
+        extra_headers = getattr(self, "extra_headers", ())
+        labels.extend([header['label'] for header in extra_headers])
         sheet.writerow(labels)
 
     def add_sheet(self, sheet_object):
