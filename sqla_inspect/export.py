@@ -345,7 +345,16 @@ about a relationship")
         """
         Format the value of the attribute 'name' from the given object
         """
-        val = getattr(obj, name, None)
+        attr_path = name.split('.')
+        val = None
+        tmp_val = obj
+        for attr in attr_path:
+            tmp_val = getattr(tmp_val, attr, None)
+            if tmp_val is None:
+                break
+        if tmp_val is not None:
+            val = tmp_val
+
         return format_value(column, val, self.config_key)
 
     def _get_relationship_cell_val(self, obj, column):
