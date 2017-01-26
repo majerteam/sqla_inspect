@@ -33,6 +33,7 @@ from sqla_inspect.export import (
 from sqla_inspect.ascii import (
     force_unicode,
 )
+from sqla_inspect.py3o_tmpl import CONTENT_TMPL
 
 
 def format_py3o_val(value):
@@ -141,6 +142,84 @@ class SqlaContext(BaseSqlaInspector):
             res.append(infos)
         return res
 
+    def make_doc(self):
+        """
+        Generate the doc for the current context in the form
+        {'key': 'label'}
+        """
+        res = {}
+        for column in self.columns:
+            if isinstance(column['__col__'], ColumnProperty):
+                key = column['name']
+                label = column['__col__'].columns[0].info.get(
+                    'colanderalchemy', {}
+                ).get('title')
+                if label is None:
+                    continue
+                res[key] = label
+
+            elif isinstance(column['__col__'], RelationshipProperty):
+                # 1- si la relation est directe (une AppOption), on override le
+                # champ avec la valeur (pour éviter des profondeurs)
+                # 2- si l'objet lié est plus complexe, on lui fait son propre
+                # chemin
+                # 3- si la relation est uselist, on fait une liste d'élément
+                # liés qu'on place dans une clé "l" et on place l'élément lié
+                # dans une clé portant le nom de son index
+                key = column['name']
+                label = column['__col__'].info.get(
+                    'colanderalchemy', {}
+                ).get('title')
+                if label is None:
+                    continue
+
+                if column['__col__'].uselist:
+                    subres = column['__prop__'].make_doc()
+
+                    for subkey, value in subres.items():
+                        new_key = u"%s.first.%s" % (key, subkey)
+                        res[new_key] = u"%s - %s (premier élément)" % (label, value)
+                        new_key = u"%s.last.%s" % (key, subkey)
+                        res[new_key] = u"%s - %s (dernier élément)" % (label, value)
+                else:
+
+                    subres = column['__prop__'].make_doc()
+                    for subkey, value in subres.items():
+                        new_key = u"%s.%s" % (key, subkey)
+                        res[new_key] = u"%s - %s" % (label, value)
+
+        print("------------------ Rendering the docs -------------------")
+        keys = res.keys()
+        keys.sort()
+        for key in keys:
+            value = res[key]
+
+            print(u"{0} : py3o.{1}".format(value, key))
+
+        return res
+
+    def gen_xml_doc(self):
+        """
+        Generate the text tags that should be inserted in the content.xml of a
+        full model
+        """
+        res = self.make_doc()
+        var_tag = """
+        <text:user-field-decl office:value-type="string" office:string-value="%s" text:name="py3o.%s"/>"""
+        text_tag = """<text:p text:style-name="P1">
+            <text:user-field-get text:name="py3o.%s">%s</text:user-field-get>
+        </text:p>
+        """
+        keys = res.keys()
+        keys.sort()
+        texts = ""
+        vars = ""
+        for key in keys:
+            value = res[key]
+            vars += var_tag % (value, key)
+            texts += text_tag % (key, value)
+        return CONTENT_TMPL % (vars, texts)
+
     def compile_obj(self, obj):
         """
         generate a context based on the given obj
@@ -167,11 +246,21 @@ class SqlaContext(BaseSqlaInspector):
                 related = getattr(obj, column['__col__'].key)
                 if column['__col__'].uselist:
                     value = {'l': []}
-                    for index, rel_obj in enumerate(related):
-                        compiled_res = column['__prop__'].compile_obj(rel_obj)
-                        value[str(index)] = compiled_res
-                        value["_" + str(index)] = compiled_res
-                        value['l'].append(compiled_res)
+                    if related:
+                        total = len(related)
+                        for index, rel_obj in enumerate(related):
+                            compiled_res = column['__prop__'].compile_obj(
+                                rel_obj
+                            )
+                            value[str(index)] = compiled_res
+                            value["_" + str(index)] = compiled_res
+
+                            if index == 0:
+                                value['first'] = compiled_res
+                            elif index == total:
+                                value['last'] = compiled_res
+
+                            value['l'].append(compiled_res)
 
                 else:
                     value = column['__prop__'].compile_obj(related)
