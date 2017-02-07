@@ -257,7 +257,7 @@ class SqlaContext(BaseSqlaInspector):
 
                             if index == 0:
                                 value['first'] = compiled_res
-                            elif index == total:
+                            elif index == total - 1:
                                 value['last'] = compiled_res
 
                             value['l'].append(compiled_res)
