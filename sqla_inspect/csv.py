@@ -26,6 +26,11 @@ CSV_QUOTECHAR = '"'
 class CsvWriter(object):
     """
     A base csv writer
+
+    headers are stored in the form of dicts
+    {'label': "Header", "name": "header"}
+
+    rows are also stored as dicts in the form {'header': 'value}
     """
     delimiter = CSV_DELIMITER
     quotechar = CSV_QUOTECHAR
@@ -85,12 +90,16 @@ class CsvWriter(object):
         """
         res_dict = {}
         headers = getattr(self, 'headers', [])
-        for header in headers:
+        extra_headers = getattr(self, 'extra_headers', [])
+        for header in headers + extra_headers:
             name, label = header['name'], header['label']
-            val = row.get(name, '')
+            val = row.get(name)
+            if val is None:
+                continue
             label = force_encoding(label, self.encoding)
             if hasattr(self, "format_%s" % name):
                 val = getattr(self, "format_%s" % name)(val)
+
             res_dict[label] = force_encoding(val, self.encoding)
         return res_dict
 
@@ -101,14 +110,6 @@ class CsvWriter(object):
         mandatory : used for the export)
         """
         self.headers = headers
-
-    def add_extra_datas(self, extra_datas):
-        """
-        Add extra datas to the last row
-
-        :param dict extra_datas: A dict {header_name: value, ...}
-        """
-        self._datas[-1].update(extra_datas)
 
 
 class SqlaCsvExporter(CsvWriter, SqlaExporter):
@@ -163,6 +164,24 @@ class SqlaCsvExporter(CsvWriter, SqlaExporter):
         CsvWriter.__init__(self, **kw)
         SqlaExporter.__init__(self, model)
 
+    def add_extra_datas(self, extra_datas):
+        """
+        Add extra datas to the last row
+        headers : [col1, col2, col3, col4, col5]
+        row : {col1: a1, col2: a2, col3: a3}
+        extra_datas : [a4, a5]
+
+        row becomes : {col1: a1, col2: a2, col3: a3, col4: a4, col5: a5}
+
+        in case of longer extra_datas, the last columns will be overriden
+
+        :param list extra_datas: list of values to set in the last columns
+        """
+        # we will add datas starting from the last index
+        for index, data in enumerate(extra_datas):
+            header = self.extra_headers[index]
+            self._datas[-1][header['label']] = data
+
 
 class CsvExporter(CsvWriter, BaseExporter):
     """
@@ -181,6 +200,24 @@ class CsvExporter(CsvWriter, BaseExporter):
     def __init__(self, **kw):
         CsvWriter.__init__(self, **kw)
         BaseExporter.__init__(self, **kw)
+
+    def add_extra_datas(self, extra_datas):
+        """
+        Add extra datas to the last row
+        headers : [col1, col2, col3, col4, col5]
+        row : {col1: a1, col2: a2, col3: a3}
+        extra_datas : [a4, a5]
+
+        row becomes : {col1: a1, col2: a2, col3: a3, col4: a4, col5: a5}
+
+        in case of longer extra_datas, the last columns will be overriden
+
+        :param list extra_datas: list of values to set in the last columns
+        """
+        # we will add datas starting from the last index
+        for index, data in enumerate(extra_datas):
+            header = self.extra_headers[index]
+            self._datas[-1][header['label']] = data
 
 
 def get_csv_reader(csv_buffer, delimiter=CSV_DELIMITER,
