@@ -91,7 +91,7 @@ class CsvWriter(object):
         res_dict = {}
         headers = getattr(self, 'headers', [])
         extra_headers = getattr(self, 'extra_headers', [])
-        for header in headers + extra_headers:
+        for header in tuple(headers) + tuple(extra_headers):
             name, label = header['name'], header['label']
             val = row.get(name)
             if val is None:
