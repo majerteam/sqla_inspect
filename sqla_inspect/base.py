@@ -18,9 +18,25 @@ from colanderalchemy.schema import _creation_order
 class BaseSqlaInspector(object):
     """
     Base class for exporters
+
+    Provide base stuff for model introspection
+
+    model
+
+        The model to inspect
+
+    excludes
+
+        Model attributes to exclude
+
+    includes
+
+        Force the list of model attributes to use
     """
-    def __init__(self, model):
+    def __init__(self, model, excludes=(), includes=(), **kw):
         self.inspector = inspect(model)
+        self.excludes = excludes
+        self.includes = includes
 
     def get_sorted_columns(self):
         """

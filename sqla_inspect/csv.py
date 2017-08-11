@@ -42,6 +42,8 @@ class CsvWriter(object):
         else:
             self.encoding = self.default_encoding
 
+        self.options = kw
+
     def render(self, f_buf=None):
         """
         Write to the dest buffer
@@ -106,10 +108,19 @@ class CsvWriter(object):
     def set_headers(self, headers):
         """
         Set the headers of our csv writer
+
         :param list headers: list of dict with label and name key (label is
         mandatory : used for the export)
         """
-        self.headers = headers
+        self.headers = []
+        if 'order' in self.options:
+            for element in self.options['order']:
+                for header in headers:
+                    if header['key'] == element:
+                        self.headers.append(header)
+                        break
+        else:
+            self.headers = headers
 
 
 class SqlaCsvExporter(CsvWriter, SqlaExporter):
@@ -162,7 +173,7 @@ class SqlaCsvExporter(CsvWriter, SqlaExporter):
 
     def __init__(self, model, **kw):
         CsvWriter.__init__(self, **kw)
-        SqlaExporter.__init__(self, model)
+        SqlaExporter.__init__(self, model, **kw)
 
     def add_extra_datas(self, extra_datas):
         """

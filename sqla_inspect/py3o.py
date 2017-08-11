@@ -74,8 +74,8 @@ class SqlaContext(BaseSqlaInspector):
     """
     config_key = 'py3o'
 
-    def __init__(self, model, rels=None):
-        BaseSqlaInspector.__init__(self, model)
+    def __init__(self, model, rels=None, **kw):
+        BaseSqlaInspector.__init__(self, model, **kw)
         # We store the relations already treated by storing the primaryjoin that
         # they use, since the backref uses the same join string, we can avoid
         # recursive collection

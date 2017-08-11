@@ -57,7 +57,7 @@ class XlsWriter(object):
     """
     title = u"Export"
 
-    def __init__(self, guess_types=True, worksheet=None):
+    def __init__(self, guess_types=True, worksheet=None, **kw):
         if worksheet is None:
             self.book = openpyxl.workbook.Workbook(guess_types=guess_types)
             self.worksheet = self.book.active
@@ -65,6 +65,7 @@ class XlsWriter(object):
         else:
             self.worksheet = worksheet
             self.book = worksheet.parent
+        self.options = kw
 
     def save_book(self, f_buf=None):
         """
@@ -166,6 +167,24 @@ class XlsWriter(object):
     def set_title(self, title):
         self.worksheet.title = title
 
+    def set_headers(self, headers):
+        """
+        Set the headers of our writer
+        :param list headers: list of dict with at least a label key
+        (label is mandatory : used for the export)
+
+        Headers are filtered and ordered regarding the order option
+        """
+        self.headers = []
+        if 'order' in self.options:
+            for element in self.options['order']:
+                for header in headers:
+                    if header.get('key', header['label']) == element:
+                        self.headers.append(header)
+                        break
+        else:
+            self.headers = headers
+
 
 def get_cell_format(column_dict, key=None):
     """
@@ -225,11 +244,16 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
     """
     config_key = 'excel'
 
-    def __init__(self, model, guess_types=True, worksheet=None):
+    def __init__(self, model, guess_types=True, worksheet=None, **kw):
         self.guess_types = guess_types
         self.is_root = worksheet is None
-        XlsWriter.__init__(self, guess_types=guess_types, worksheet=worksheet)
-        SqlaExporter.__init__(self, model=model)
+        XlsWriter.__init__(
+            self,
+            guess_types=guess_types,
+            worksheet=worksheet,
+            **kw
+        )
+        SqlaExporter.__init__(self, model=model, **kw)
 
     def _get_related_exporter(self, related_obj, column):
         """

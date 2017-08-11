@@ -91,6 +91,11 @@ def format_value(column_dict, value, key=None):
     :param value: A value coming from the database
     :param key: The exportation key
     """
+    print(" + Formatting a value")
+    print(column_dict)
+    print(value)
+    print("    Config_key : %s" % key)
+
     formatter = column_dict.get('formatter')
     prop = column_dict['__col__']
 
@@ -107,9 +112,15 @@ def format_value(column_dict, value, key=None):
             sqla_column = prop.columns[0]
             column_type = getattr(sqla_column.type, 'impl', sqla_column.type)
 
+            print("    Looking for a main formatter")
+            print("    Column type : %s" % column_type)
+
             formatter = FORMATTERS_REGISTRY.get_formatter(column_type, key)
             if formatter is not None:
+                print("    Found a formatter : %s" % formatter)
                 res = formatter(value)
+            else:
+                print("    No formatter found")
 
     return res
 
@@ -139,10 +150,10 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
     """
     config_key = ''
 
-    def __init__(self, model):
+    def __init__(self, model, **kw):
         BaseExporter.__init__(self)
-        BaseSqlaInspector.__init__(self, model)
-        self.headers = self._collect_headers()
+        BaseSqlaInspector.__init__(self, model, **kw)
+        self.set_headers(self._collect_headers())
 
     def _is_excluded(self, prop, info_dict):
         """
@@ -152,6 +163,12 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
             return True
 
         if info_dict.get('exclude', False):
+            return True
+
+        if prop.key in self.excludes:
+            return True
+
+        if self.includes and prop.key not in self.includes:
             return True
 
         return False
@@ -325,6 +342,7 @@ about a relationship")
 
                instance of the exporter's model
         """
+        print("add_row")
         row = {}
         for column in self.headers:
 

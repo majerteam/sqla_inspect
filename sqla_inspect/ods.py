@@ -39,9 +39,10 @@ class OdsWriter(object):
     """
     default_title = u"Export"
 
-    def __init__(self, title=None):
+    def __init__(self, title=None, **kw):
         self.sheets = []
         self.title = title or self.default_title
+        self.options = kw
 
     def render(self, f_buf=None):
         """
@@ -110,6 +111,24 @@ class OdsWriter(object):
     def set_title(self, title):
         self.title = title
 
+    def set_headers(self, headers):
+        """
+        Set the headers of our writer
+        :param list headers: list of dict with at least a label key
+        (label is mandatory : used for the export)
+
+        Headers are filtered and ordered regarding the order option
+        """
+        self.headers = []
+        if 'order' in self.options:
+            for element in self.options['order']:
+                for header in headers:
+                    if header.get('key', header['label']) == element:
+                        self.headers.append(header)
+                        break
+        else:
+            self.headers = headers
+
 
 class SqlaOdsExporter(OdsWriter, SqlaExporter):
     """
@@ -151,10 +170,10 @@ class SqlaOdsExporter(OdsWriter, SqlaExporter):
     """
     config_key = 'ods'
 
-    def __init__(self, model, is_root=True, title=None):
+    def __init__(self, model, is_root=True, title=None, **kw):
         self.is_root = is_root
-        OdsWriter.__init__(self, title=title)
-        SqlaExporter.__init__(self, model)
+        OdsWriter.__init__(self, title=title, **kw)
+        SqlaExporter.__init__(self, model, **kw)
 
     def _get_related_exporter(self, related_obj, column):
         """
