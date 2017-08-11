@@ -91,11 +91,6 @@ def format_value(column_dict, value, key=None):
     :param value: A value coming from the database
     :param key: The exportation key
     """
-    print(" + Formatting a value")
-    print(column_dict)
-    print(value)
-    print("    Config_key : %s" % key)
-
     formatter = column_dict.get('formatter')
     prop = column_dict['__col__']
 
@@ -112,16 +107,9 @@ def format_value(column_dict, value, key=None):
             sqla_column = prop.columns[0]
             column_type = getattr(sqla_column.type, 'impl', sqla_column.type)
 
-            print("    Looking for a main formatter")
-            print("    Column type : %s" % column_type)
-
             formatter = FORMATTERS_REGISTRY.get_formatter(column_type, key)
             if formatter is not None:
-                print("    Found a formatter : %s" % formatter)
                 res = formatter(value)
-            else:
-                print("    No formatter found")
-
     return res
 
 
@@ -342,7 +330,6 @@ about a relationship")
 
                instance of the exporter's model
         """
-        print("add_row")
         row = {}
         for column in self.headers:
 
