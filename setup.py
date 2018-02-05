@@ -3,6 +3,10 @@ import os
 from setuptools import setup
 
 
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, 'requirements.txt')) as f:
+    requires = f.read()
+
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
@@ -16,7 +20,7 @@ setup(
     url='https://github.com/majerteam/sqla_inspect',
     author='Gaston Tjebbes - Majerti',
     author_email='tech@majerti.fr',
-    install_requires=['SQLAlchemy', 'py3o.template', 'openpyxl', 'colanderalchemy', 'unidecode', 'odswriter'],
+    install_requires=requires,
     extra_requires={'docs': ['sphinx'], 'test': ['pytest']},
     classifiers=[
         'Intended Audience :: Developers',
