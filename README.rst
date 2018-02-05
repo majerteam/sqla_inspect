@@ -2,6 +2,12 @@
 SQLAlchemy inspection tools
 ============================
 
+
+.. image::
+    https://secure.travis-ci.org/majerteam/sqla_inspect.png?branch=master
+   :target: http://travis-ci.org/majerteam/sqla_inspect
+   :alt: Travis-ci: continuous integration status.
+
 Provide tools for sqlalchemy models :
 
 * inspection
