@@ -178,9 +178,13 @@ class SqlaContext(BaseSqlaInspector):
 
                     for subkey, value in subres.items():
                         new_key = u"%s.first.%s" % (key, subkey)
-                        res[new_key] = u"%s - %s (premier élément)" % (label, value)
+                        res[new_key] = u"%s - %s (premier élément)" % (
+                            label, value
+                        )
                         new_key = u"%s.last.%s" % (key, subkey)
-                        res[new_key] = u"%s - %s (dernier élément)" % (label, value)
+                        res[new_key] = u"%s - %s (dernier élément)" % (
+                            label, value
+                        )
                 else:
 
                     subres = column['__prop__'].make_doc()
@@ -205,7 +209,8 @@ class SqlaContext(BaseSqlaInspector):
         """
         res = self.make_doc()
         var_tag = """
-        <text:user-field-decl office:value-type="string" office:string-value="%s" text:name="py3o.%s"/>"""
+        <text:user-field-decl office:value-type="string"
+        office:string-value="%s" text:name="py3o.%s"/>"""
         text_tag = """<text:p text:style-name="P1">
             <text:user-field-get text:name="py3o.%s">%s</text:user-field-get>
         </text:p>
@@ -220,6 +225,107 @@ class SqlaContext(BaseSqlaInspector):
             texts += text_tag % (key, value)
         return CONTENT_TMPL % (vars, texts)
 
+    def _get_formatted_val(self, obj, attribute, column):
+        """
+        Return the formatted value of the attribute "attribute" of the obj "obj"
+        regarding the column's description
+
+        :param obj obj: The instance we manage
+        :param str attribute: The string defining the path to access the end
+        attribute we want to manage
+        :param dict column: The column description dictionnary
+        :returns: The associated value
+        """
+        attr_path = attribute.split('.')
+        val = None
+        tmp_val = obj
+        for attr in attr_path:
+            tmp_val = getattr(tmp_val, attr, None)
+            if tmp_val is None:
+                break
+        if tmp_val is not None:
+            val = tmp_val
+
+        value = format_value(column, val, self.config_key)
+        return format_py3o_val(value)
+
+    def _get_column_value(self, obj, column):
+        """
+        Return a single cell's value
+
+        :param obj obj: The instance we manage
+        :param dict column: The column description dictionnary
+        :returns: The associated value
+        """
+        return self._get_formatted_val(obj, column['__col__'].key, column)
+
+    def _get_to_many_relationship_value(self, obj, column):
+        """
+        Get the resulting datas for a One To many or a many to many relationship
+
+        :param obj obj: The instance we manage
+        :param dict column: The column description dictionnary
+        :returns: The associated value
+        """
+        related_key = column.get('related_key', None)
+
+        related = getattr(obj, column['__col__'].key)
+        value = {}
+        if related:
+            total = len(related)
+            for index, rel_obj in enumerate(related):
+                if related_key:
+                    compiled_res = self._get_formatted_val(
+                        rel_obj, related_key, column
+                    )
+                else:
+                    compiled_res = column['__prop__'].compile_obj(
+                        rel_obj
+                    )
+                value['item_%d' % index] = compiled_res
+                value[str(index)] = compiled_res
+                value["_" + str(index)] = compiled_res
+
+                if index == 0:
+                    value['first'] = compiled_res
+
+                if index == total - 1:
+                    value['last'] = compiled_res
+
+        return value
+
+    def _get_to_one_relationship_value(self, obj, column):
+        """
+        Compute datas produced for a many to one relationship
+
+        :param obj obj: The instance we manage
+        :param dict column: The column description dictionnary
+        :returns: The associated value
+        """
+        related_key = column.get('related_key', None)
+        related = getattr(obj, column['__col__'].key)
+        if related:
+            if related_key is not None:
+                value = self._get_formatted_val(
+                    related, related_key, column
+                )
+            else:
+                value = column['__prop__'].compile_obj(related)
+        else:
+            value = ""
+        return value
+
+    def _get_relationship_value(self, obj, column):
+        """
+        Compute datas produced for a given relationship
+        """
+        if column['__col__'].uselist:
+            value = self._get_to_many_relationship_value(obj, column)
+        else:
+            value = self._get_to_one_relationship_value(obj, column)
+
+        return value
+
     def compile_obj(self, obj):
         """
         generate a context based on the given obj
@@ -229,42 +335,10 @@ class SqlaContext(BaseSqlaInspector):
         res = {}
         for column in self.columns:
             if isinstance(column['__col__'], ColumnProperty):
-                value = getattr(obj, column['__col__'].key, None)
-
-                value = format_value(column, value, self.config_key)
-
-                value = format_py3o_val(value)
+                value = self._get_column_value(obj, column)
 
             elif isinstance(column['__col__'], RelationshipProperty):
-                # 1- si la relation est directe (une AppOption), on override le
-                # champ avec la valeur (pour éviter des profondeurs)
-                # 2- si l'objet lié est plus complexe, on lui fait son propre
-                # chemin
-                # 3- si la relation est uselist, on fait une liste d'élément
-                # liés qu'on place dans une clé "l" et on place l'élément lié
-                # dans une clé portant le nom de son index
-                related = getattr(obj, column['__col__'].key)
-                if column['__col__'].uselist:
-                    value = {'l': []}
-                    if related:
-                        total = len(related)
-                        for index, rel_obj in enumerate(related):
-                            compiled_res = column['__prop__'].compile_obj(
-                                rel_obj
-                            )
-                            value[str(index)] = compiled_res
-                            value["_" + str(index)] = compiled_res
-
-                            if index == 0:
-                                value['first'] = compiled_res
-
-                            if index == total - 1:
-                                value['last'] = compiled_res
-
-                            value['l'].append(compiled_res)
-
-                else:
-                    value = column['__prop__'].compile_obj(related)
+                value = self._get_relationship_value(obj, column)
 
             res[column['name']] = value
 
@@ -297,7 +371,7 @@ def compile_template(instance, template, additionnal_context=None):
 
     :param obj instance: the instance of a model (like Userdatas, Company)
     :param template: the template object to use
-    :param dict additionnal_context: A dict containing datas we'd like to ass to
+    :param dict additionnal_context: A dict containing datas we'd like to add to
     the py3o compilation template
     :return: a stringIO object filled with the resulting odt's informations
     """
