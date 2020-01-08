@@ -2,6 +2,8 @@
 SQLAlchemy inspection tools
 ============================
 
+Since version 5.0 this library only support python 3
+
 
 .. image::
     https://secure.travis-ci.org/majerteam/sqla_inspect.png?branch=master
