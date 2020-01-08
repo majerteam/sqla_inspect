@@ -7,9 +7,9 @@
     Provide common tools for string handling
 """
 import re
-import unidecode
+from unidecode import unidecode
 import random
-from string import lowercase
+from string import ascii_lowercase
 
 
 def force_ascii(value):
@@ -17,43 +17,51 @@ def force_ascii(value):
         Return enforced ascii string
         éko=>ko
     """
-    if not isinstance(value, (str, unicode)):
-        return unicode(value)
-    if isinstance(value, unicode):
-        return unidecode.unidecode(value)
-    else:
-        return unidecode.unidecode(force_unicode(value))
+    if isinstance(value, bytes):
+        value = force_string(value)
+    value = unidecode(value)
+    return value
 
 
 def force_utf8(value):
     """
-    return an utf-8 string
+    return a utf-8 byte string
+
+    :param str value:
+    :rtype: bytes
     """
     return force_encoding(value)
 
 
-def force_encoding(value, encoding='utf-8'):
+def force_encoding(value, encoding):
     """
-    Return a string encoded in the provided encoding
+    :rtype: bytes
     """
-    if not isinstance(value, (str, unicode)):
+    if not isinstance(value, (str, bytes)):
         value = str(value)
-    if isinstance(value, unicode):
+
+    if isinstance(value, str):
         value = value.encode(encoding)
     elif encoding != 'utf-8':
         value = value.decode('utf-8').encode(encoding)
     return value
 
 
-def force_unicode(value):
+def force_string(value):
     """
-    return an utf-8 unicode entry
+    return an utf-8 str
+
+    :param bytes value: The original value to convert
+    :rtype: str
     """
-    if not isinstance(value, (str, unicode)):
-        value = unicode(value)
-    if isinstance(value, str):
-        value = value.decode('utf-8')
+    if isinstance(value, bytes):
+        value = value.decode('utf-8') 
+    elif not isinstance(value, str):
+        value = str(value)
     return value
+
+
+force_unicode = force_string
 
 
 def camel_case_to_name(name):
@@ -73,7 +81,7 @@ def gen_random_string(size=15):
 
             size of the resulting string
     """
-    return ''.join(random.choice(lowercase) for _ in range(size))
+    return ''.join(random.choice(ascii_lowercase) for _ in range(size))
 
 
 def random_tag_id(size=15):
@@ -83,24 +91,24 @@ def random_tag_id(size=15):
     return gen_random_string(size)
 
 
-def to_utf8(datas):
+def to_utf8(data):
     """
     Force utf8 string entries in the given datas
     """
-    res = datas
-    if isinstance(datas, dict):
+    res = data
+    if isinstance(data, dict):
         res = {}
-        for key, value in datas.items():
+        for key, value in data.items():
             key = to_utf8(key)
             value = to_utf8(value)
             res[key] = value
 
-    elif isinstance(datas, (list, tuple)):
+    elif isinstance(data, (list, tuple)):
         res = []
-        for data in datas:
+        for data in data:
             res.append(to_utf8(data))
 
-    elif isinstance(datas, unicode):
-        res = datas.encode('utf-8')
+    elif isinstance(data, (str, bytes)):
+        res = force_utf8(data)
 
     return res

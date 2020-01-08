@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# i*- coding: utf-8 -*-
 # * Authors:
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
@@ -15,7 +15,7 @@ from openpyxl.styles import (
     Font,
 )
 
-import cStringIO as StringIO
+import io
 from string import ascii_uppercase
 
 from sqla_inspect.export import (
@@ -75,7 +75,7 @@ class XlsWriter(object):
         methods
         """
         if f_buf is None:
-            f_buf = StringIO.StringIO()
+            f_buf = io.BytesIO()
         f_buf.write(openpyxl.writer.excel.save_virtual_workbook(self.book))
         f_buf.seek(0)
         return f_buf

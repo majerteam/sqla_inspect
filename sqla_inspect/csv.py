@@ -8,11 +8,9 @@
 
     uses the sqlalchemy info attr to retrieve meta datas about the columns
 """
-from __future__ import absolute_import
 import csv
-import cStringIO as StringIO
+import io
 
-from sqla_inspect.ascii import force_encoding
 from sqla_inspect.export import (
     BaseExporter,
     SqlaExporter,
@@ -34,14 +32,8 @@ class CsvWriter(object):
     """
     delimiter = CSV_DELIMITER
     quotechar = CSV_QUOTECHAR
-    default_encoding = 'utf-8'
 
     def __init__(self, **kw):
-        if 'encoding' in kw:
-            self.encoding = kw['encoding']
-        else:
-            self.encoding = self.default_encoding
-
         self.options = kw
 
     def render(self, f_buf=None):
@@ -52,20 +44,14 @@ class CsvWriter(object):
         methods
         """
         if f_buf is None:
-            f_buf = StringIO.StringIO()
+            f_buf = io.StringIO()
 
         headers = getattr(self, 'headers', ())
 
-        keys = [
-            force_encoding(header['label'], self.encoding)
-            for header in headers
-        ]
+        keys = [header['label'] for header in headers]
 
         extra_headers = getattr(self, 'extra_headers', ())
-        keys.extend([
-            force_encoding(header['label'], self.encoding)
-            for header in extra_headers
-        ])
+        keys.extend([header['label'] for header in extra_headers])
 
         outfile = csv.DictWriter(
             f_buf,
@@ -98,11 +84,10 @@ class CsvWriter(object):
             val = row.get(name)
             if val is None:
                 continue
-            label = force_encoding(label, self.encoding)
             if hasattr(self, "format_%s" % name):
                 val = getattr(self, "format_%s" % name)(val)
 
-            res_dict[label] = force_encoding(val, self.encoding)
+            res_dict[label] = val
         return res_dict
 
     def set_headers(self, headers):
@@ -155,13 +140,10 @@ class SqlaCsvExporter(CsvWriter, SqlaExporter):
 
             This data will not be inserted in the export if True
 
-        encoding
-
-            The encoding of the csv output
 
     Usage:
 
-        a = SqlaCsvWriter(MyModel, encoding='utf-8')
+        a = SqlaCsvWriter(MyModel)
         for i in MyModel.query().filter(<myfilter>):
             a.add_row(i)
         a.render()
@@ -202,7 +184,7 @@ class CsvExporter(CsvWriter, BaseExporter):
     class MyCsvExporter(CsvExporter):
         headers = ({'name': 'key', 'label': u'Ma colonne 1'}, ...)
 
-    writer = MyCsvExporter(encoding='utf-8')
+    writer = MyCsvExporter()
     writer.add_row({'key': u'La valeur de la cellule de la colonne 1'})
     writer.render()
     """

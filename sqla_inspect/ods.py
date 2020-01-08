@@ -8,7 +8,7 @@ Ods exportation module
 """
 import logging
 import odswriter
-import cStringIO as StringIO
+import io
 
 from sqla_inspect.export import (
     BaseExporter,
@@ -52,7 +52,8 @@ class OdsWriter(object):
         methods
         """
         if f_buf is None:
-            f_buf = StringIO.StringIO()
+            f_buf = io.BytesIO()
+
         with odswriter.writer(f_buf) as writer:
             default_sheet = writer.new_sheet(self.title)
             self._render_headers(default_sheet)

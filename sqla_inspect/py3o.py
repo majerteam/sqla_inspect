@@ -12,7 +12,7 @@ Py3o exporters
 >>> odt_file_datas = compile_template(model, template.data_obj)
 """
 from __future__ import absolute_import
-from cStringIO import StringIO
+from io import StringIO
 
 from xml.sax.saxutils import escape
 

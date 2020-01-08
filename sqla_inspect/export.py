@@ -113,6 +113,7 @@ def format_value(column_dict, value, key=None):
             formatter = FORMATTERS_REGISTRY.get_formatter(column_type, key)
             if formatter is not None:
                 res = formatter(value)
+
     return res
 
 
