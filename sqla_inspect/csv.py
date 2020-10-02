@@ -57,13 +57,13 @@ class CsvWriter(object):
         headers = getattr(self, 'headers', ())
 
         keys = [
-            force_encoding(header['label'], self.encoding)
+            force_encoding(header['label'], self.encoding, 'replace')
             for header in headers
         ]
 
         extra_headers = getattr(self, 'extra_headers', ())
         keys.extend([
-            force_encoding(header['label'], self.encoding)
+            force_encoding(header['label'], self.encoding, 'replace')
             for header in extra_headers
         ])
 
@@ -98,11 +98,11 @@ class CsvWriter(object):
             val = row.get(name)
             if val is None:
                 continue
-            label = force_encoding(label, self.encoding)
+            label = force_encoding(label, self.encoding, 'replace')
             if hasattr(self, "format_%s" % name):
                 val = getattr(self, "format_%s" % name)(val)
 
-            res_dict[label] = force_encoding(val, self.encoding)
+            res_dict[label] = force_encoding(val, self.encoding, 'replace')
         return res_dict
 
     def set_headers(self, headers):
