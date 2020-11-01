@@ -12,7 +12,7 @@ Py3o exporters
 >>> odt_file_datas = compile_template(model, template.data_obj)
 """
 from __future__ import absolute_import
-from io import StringIO
+from io import BytesIO
 
 from xml.sax.saxutils import escape
 
@@ -380,7 +380,7 @@ def compile_template(instance, template, additionnal_context=None):
     if additionnal_context is not None:
         py3o_context.update(additionnal_context)
 
-    output_doc = StringIO()
+    output_doc = BytesIO()
 
     odt_builder = Template(template, output_doc)
     odt_builder.render(py3o_context)
