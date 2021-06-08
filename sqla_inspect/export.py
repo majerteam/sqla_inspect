@@ -137,8 +137,8 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
 
         .. note::
 
-            By default, we look for the title in the colanderalchemy's title key
-            info={'colanderalchemy': {'title': u'Column title'}}
+            By default, we look for the title in the colanderalchemy's title
+            key info={'colanderalchemy': {'title': u'Column title'}}
     """
     config_key = ''
 
@@ -241,10 +241,14 @@ about a relationship")
         * Many To One :
 
             If a related_key is provided, we remove the associated foreign key
-            from the output (we collect its associated title) and only the given
-            key of the associated object will be exported
+            from the output (we collect its associated title) and only the
+            given key of the associated object will be exported
             If no related_key is provided, we use the relationship's title as
-            prefix and for each attribute of the related object, we add a column
+            prefix and for each attribute of the related object, we add a
+            column
+            If a callable is provided under the formatter key, it will be used
+            to format the related object
+
 
         :param dict main_infos: The already collected datas about this column
         :param obj prop: The property mapper of the relationship
@@ -258,7 +262,7 @@ about a relationship")
             # One to many
             pass
         else:
-            if "related_key" in main_infos:
+            if "related_key" in main_infos or 'formatter' in main_infos:
                 self._merge_many_to_one_field(main_infos, prop, result)
             else:
                 related_field_inspector = BaseSqlaInspector(prop.mapper)
@@ -406,6 +410,8 @@ about a relationship")
         else:  # Many to One
             if related_key is not None:
                 val = self._get_formatted_val(related_obj, related_key, column)
+            elif 'formatter' in column:
+                val = format_value(column, related_obj)
 
         return val
 

@@ -111,6 +111,8 @@ Csv Export
 See `Customization`_ to know how to set custom formatters, labels, exclusions
 and relationship formatters.
 
+NB : OneToMany relationships are not exported in CSV format.
+
 
 Excel export
 -------------
@@ -128,6 +130,28 @@ Excel export
 
 See `Customization`_ to know how to set custom formatters, labels, exclusions
 and relationship formatters.
+
+NB : In this case OneToMany relationships will be exported in separate sheets.
+
+
+Ods export
+-------------
+
+.. code-block:: python
+
+    from sqla_inspect.csv import SqlaOdsExporter
+
+    exporter = SqlaOdsExporter(Model)
+    for row in Model.query():
+        exporter.add_row(row)
+    with open('/tmp/test.ods', 'w') as f_buffer:
+        exporter.render(f_buffer)
+
+
+See `Customization`_ to know how to set custom formatters, labels, exclusions
+and relationship formatters.
+
+NB : In this case OneToMany relationships will be exported in separate sheets.
 
 
 Customization
@@ -200,16 +224,102 @@ If not set it will look one level higher in the export key
     class Model(Base):
         attr1 = Column(
             Integer,
-            info={'export': {'label': u'My custom header'}}
+            info={
+                'export': {
+                    'label': u'My custom header',
+                    'formatter': lambda value: 5 * value
+                }
+            }
         )
 
-If not set, only in the case of labels, it will look into the colanderalchemy
-'title' attribute (info={'colanderalchemy': {'title': u'My title'}}).
+Labels
+~~~~~~
 
-The same things can be done with the excel.SqlaXlsExporter class (that shares
-the export dict with the SqlaCsvExporter.
+If the label is not set (only in the case of labels), it will look into the
+colanderalchemy 'title' attribute
+
+.. code-block:: python
+
+    class Model(Base):
+        attr1 = Column(
+            Integer,
+            info={'colanderalchemy': {'title': u'My title'}}
+        )
+
+Formatter
+~~~~~~~~~~
+
+If the value stored in the database should be presented differently in the csv
+output. We use the `formatter` configuration key. A formatter is a callable
+taking the db value as parameters.
+
+.. code-block:: python
+
+    class Model(Base):
+        attr1 = Column(
+            Integer,
+            info={'export': {
+            'title': u'My title',
+            'formatter': lambda value: convert_value_to_display_format(value)
+            }}
+        )
+
+
+M2O Relationships
+~~~~~~~~~~~~~~~~~~~
+
+ManyToOne relationships can be considered in two ways :
+
+1- The related object is an "option" an object holding a label
+2- The related object is another entity with several interesting attributes
+
+Case 1 can be handled by specifying a related_key that sets the "option's"
+attribute to use to fill the Csv column
+
+.. code-block:: python
+
+    class Model(Base):
+        attr1 = relationship(
+            "OptionModel",
+            info={'export': {'related_key': 'label'}}
+        )
+
+Related key can also be a path (allows to go further on in M2O relationships.
+The path is dot separated.
+
+.. code-block:: python
+
+    class Model(Base):
+        attr1 = relationship(
+            "OptionModel",
+            info={'export': {'related_key': 'other_option.label'}}
+        )
+
+Case 1 can also be handled with a formatter, a formatter is a callable taking
+the remote object as parameter and returning a computed value (here we call
+the OptionModel.method() method)
+
+.. code-block:: python
+
+    class Model(Base):
+        attr1 = relationship(
+            "OptionModel",
+            info={'export': {'formatter': lambda value: value.method()}}
+        )
+
+Case 2 can be handled by setting the configuration keys on the different
+attributes from the related class.
+
+
+The same things can be done with the excel.SqlaXlsExporter and ods.SqlaOdsExport
+class (that shares the export dict with the SqlaCsvExporter.
+
 
 LIMITATIONS
 ------------
 
-Relationship that point to lists are not handled yet.
+OneToMany relationships (that point to lists) are not handled in csv format.
+
+If you configure several exports (around different objects), export
+configuration may conflict (excludes maybe usefull to avoid circular inspection
+one side but not the other).
