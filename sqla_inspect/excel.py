@@ -57,9 +57,9 @@ class XlsWriter(object):
     """
     title = u"Export"
 
-    def __init__(self, guess_types=True, worksheet=None, **kw):
+    def __init__(self, worksheet=None, **kw):
         if worksheet is None:
-            self.book = openpyxl.workbook.Workbook(guess_types=guess_types)
+            self.book = openpyxl.workbook.Workbook()
             self.worksheet = self.book.active
             self.worksheet.title = self.title
         else:
