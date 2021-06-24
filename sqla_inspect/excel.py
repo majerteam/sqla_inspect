@@ -92,7 +92,7 @@ class XlsWriter(object):
 
                 A openpyxl color var
         """
-        cell.style = cell.style.copy(font=Font(color=Color(rgb=color)))
+        cell.font = Font(color=Color(rgb=color))
 
     def format_row(self, row):
         """
