@@ -79,7 +79,8 @@ class SqlaContext(BaseSqlaInspector):
         # We store the relations already treated by storing the primaryjoin that
         # they use, since the backref uses the same join string, we can avoid
         # recursive collection
-        self.rels = rels or []
+        self.parent_rels = rels or []
+        self.rels = []
         self.columns = self.collect_columns()
 
     def collect_columns(self):
@@ -130,13 +131,13 @@ class SqlaContext(BaseSqlaInspector):
             infos['__col__'] = prop
             if isinstance(prop, RelationshipProperty):
                 join = str(prop.primaryjoin)
-                if join in self.rels:
+                if join in self.parent_rels:
                     continue
                 else:
                     self.rels.append(str(join))
                     infos['__prop__'] = SqlaContext(
                         prop.mapper,
-                        rels=self.rels[:]
+                        rels=self.rels + self.parent_rels
                     )
 
             res.append(infos)

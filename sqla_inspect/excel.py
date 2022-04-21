@@ -257,8 +257,8 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
 
     def _get_related_exporter(self, related_obj, column):
         """
-        returns an SqlaXlsExporter for the given related object and stores it in
-        the column object as a cache
+        returns an SqlaXlsExporter for the given related object and stores it
+        in the column object as a cache
         """
         result = column.get('sqla_xls_exporter')
         if result is None:
