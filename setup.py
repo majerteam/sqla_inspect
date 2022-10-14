@@ -12,7 +12,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='sqla_inspect',
-    version='0.7.2',
+    version='0.7.3',
     packages=['sqla_inspect'],
     include_package_data=True,
     license='GPLv3',
@@ -28,7 +28,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         # Replace these appropriately if you are stuck on Python 2.
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Topic :: Database',
     ],
 )
