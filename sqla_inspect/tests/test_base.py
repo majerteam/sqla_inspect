@@ -10,8 +10,10 @@ from sqla_inspect.base import FormatterRegistry
 class Dummy(object):
     pass
 
+
 def dummy_func(a):
     return a
+
 
 def test_registry():
     f = FormatterRegistry()
@@ -19,10 +21,9 @@ def test_registry():
 
     f.add_formatter(Dummy, dummy_func)
     assert f.get_formatter(Dummy()) is dummy_func
-    assert f.get_formatter(Dummy(), 'non_existingkey') is dummy_func
+    assert f.get_formatter(Dummy(), "non_existingkey") is dummy_func
 
     f = FormatterRegistry()
-    f.add_formatter(Dummy, dummy_func, 'key')
-    assert f.get_formatter(Dummy(), 'key') is dummy_func
+    f.add_formatter(Dummy, dummy_func, "key")
+    assert f.get_formatter(Dummy(), "key") is dummy_func
     assert f.get_formatter(Dummy()) is None
-

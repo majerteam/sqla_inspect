@@ -44,7 +44,7 @@ def format_py3o_val(value):
     """
     value = force_unicode(value)
     value = escape(value)
-    value = value.replace(u'\n', u'<text:line-break/>')
+    value = value.replace(u"\n", u"<text:line-break/>")
     return Markup(value)
 
 
@@ -72,7 +72,8 @@ class SqlaContext(BaseSqlaInspector):
 
     :param model: a SQLA model
     """
-    config_key = 'py3o'
+
+    config_key = "py3o"
 
     def __init__(self, model, rels=None, **kw):
         BaseSqlaInspector.__init__(self, model, **kw)
@@ -114,12 +115,12 @@ class SqlaContext(BaseSqlaInspector):
         for prop in self.get_sorted_columns():
 
             info_dict = self.get_info_field(prop)
-            export_infos = info_dict.get('export', {}).copy()
+            export_infos = info_dict.get("export", {}).copy()
 
             main_infos = export_infos.get(self.config_key, {}).copy()
 
-            if export_infos.get('exclude'):
-                if main_infos.get('exclude', True):
+            if export_infos.get("exclude"):
+                if main_infos.get("exclude", True):
                     continue
 
             infos = export_infos
@@ -127,17 +128,16 @@ class SqlaContext(BaseSqlaInspector):
 
             # Si la clé name n'est pas définit on la met au nom de la colonne
             # par défaut
-            infos.setdefault('name', prop.key)
-            infos['__col__'] = prop
+            infos.setdefault("name", prop.key)
+            infos["__col__"] = prop
             if isinstance(prop, RelationshipProperty):
                 join = str(prop.primaryjoin)
                 if join in self.parent_rels:
                     continue
                 else:
                     self.rels.append(str(join))
-                    infos['__prop__'] = SqlaContext(
-                        prop.mapper,
-                        rels=self.rels + self.parent_rels
+                    infos["__prop__"] = SqlaContext(
+                        prop.mapper, rels=self.rels + self.parent_rels
                     )
 
             res.append(infos)
@@ -150,16 +150,19 @@ class SqlaContext(BaseSqlaInspector):
         """
         res = {}
         for column in self.columns:
-            if isinstance(column['__col__'], ColumnProperty):
-                key = column['name']
-                label = column['__col__'].columns[0].info.get(
-                    'colanderalchemy', {}
-                ).get('title')
+            if isinstance(column["__col__"], ColumnProperty):
+                key = column["name"]
+                label = (
+                    column["__col__"]
+                    .columns[0]
+                    .info.get("colanderalchemy", {})
+                    .get("title")
+                )
                 if label is None:
                     continue
                 res[key] = label
 
-            elif isinstance(column['__col__'], RelationshipProperty):
+            elif isinstance(column["__col__"], RelationshipProperty):
                 # 1- si la relation est directe (une AppOption), on override le
                 # champ avec la valeur (pour éviter des profondeurs)
                 # 2- si l'objet lié est plus complexe, on lui fait son propre
@@ -167,28 +170,22 @@ class SqlaContext(BaseSqlaInspector):
                 # 3- si la relation est uselist, on fait une liste d'élément
                 # liés qu'on place dans une clé "l" et on place l'élément lié
                 # dans une clé portant le nom de son index
-                key = column['name']
-                label = column['__col__'].info.get(
-                    'colanderalchemy', {}
-                ).get('title')
+                key = column["name"]
+                label = column["__col__"].info.get("colanderalchemy", {}).get("title")
                 if label is None:
                     continue
 
-                if column['__col__'].uselist:
-                    subres = column['__prop__'].make_doc()
+                if column["__col__"].uselist:
+                    subres = column["__prop__"].make_doc()
 
                     for subkey, value in subres.items():
                         new_key = u"%s.first.%s" % (key, subkey)
-                        res[new_key] = u"%s - %s (premier élément)" % (
-                            label, value
-                        )
+                        res[new_key] = u"%s - %s (premier élément)" % (label, value)
                         new_key = u"%s.last.%s" % (key, subkey)
-                        res[new_key] = u"%s - %s (dernier élément)" % (
-                            label, value
-                        )
+                        res[new_key] = u"%s - %s (dernier élément)" % (label, value)
                 else:
 
-                    subres = column['__prop__'].make_doc()
+                    subres = column["__prop__"].make_doc()
                     for subkey, value in subres.items():
                         new_key = u"%s.%s" % (key, subkey)
                         res[new_key] = u"%s - %s" % (label, value)
@@ -237,7 +234,7 @@ class SqlaContext(BaseSqlaInspector):
         :param dict column: The column description dictionnary
         :returns: The associated value
         """
-        attr_path = attribute.split('.')
+        attr_path = attribute.split(".")
         val = None
         tmp_val = obj
         for attr in attr_path:
@@ -258,7 +255,7 @@ class SqlaContext(BaseSqlaInspector):
         :param dict column: The column description dictionnary
         :returns: The associated value
         """
-        return self._get_formatted_val(obj, column['__col__'].key, column)
+        return self._get_formatted_val(obj, column["__col__"].key, column)
 
     def _get_to_many_relationship_value(self, obj, column):
         """
@@ -268,30 +265,26 @@ class SqlaContext(BaseSqlaInspector):
         :param dict column: The column description dictionnary
         :returns: The associated value
         """
-        related_key = column.get('related_key', None)
+        related_key = column.get("related_key", None)
 
-        related = getattr(obj, column['__col__'].key)
+        related = getattr(obj, column["__col__"].key)
         value = {}
         if related:
             total = len(related)
             for index, rel_obj in enumerate(related):
                 if related_key:
-                    compiled_res = self._get_formatted_val(
-                        rel_obj, related_key, column
-                    )
+                    compiled_res = self._get_formatted_val(rel_obj, related_key, column)
                 else:
-                    compiled_res = column['__prop__'].compile_obj(
-                        rel_obj
-                    )
-                value['item_%d' % index] = compiled_res
+                    compiled_res = column["__prop__"].compile_obj(rel_obj)
+                value["item_%d" % index] = compiled_res
                 value[str(index)] = compiled_res
                 value["_" + str(index)] = compiled_res
 
                 if index == 0:
-                    value['first'] = compiled_res
+                    value["first"] = compiled_res
 
                 if index == total - 1:
-                    value['last'] = compiled_res
+                    value["last"] = compiled_res
 
         return value
 
@@ -303,15 +296,13 @@ class SqlaContext(BaseSqlaInspector):
         :param dict column: The column description dictionnary
         :returns: The associated value
         """
-        related_key = column.get('related_key', None)
-        related = getattr(obj, column['__col__'].key)
+        related_key = column.get("related_key", None)
+        related = getattr(obj, column["__col__"].key)
         if related:
             if related_key is not None:
-                value = self._get_formatted_val(
-                    related, related_key, column
-                )
+                value = self._get_formatted_val(related, related_key, column)
             else:
-                value = column['__prop__'].compile_obj(related)
+                value = column["__prop__"].compile_obj(related)
         else:
             value = ""
         return value
@@ -320,7 +311,7 @@ class SqlaContext(BaseSqlaInspector):
         """
         Compute datas produced for a given relationship
         """
-        if column['__col__'].uselist:
+        if column["__col__"].uselist:
             value = self._get_to_many_relationship_value(obj, column)
         else:
             value = self._get_to_one_relationship_value(obj, column)
@@ -335,13 +326,13 @@ class SqlaContext(BaseSqlaInspector):
         """
         res = {}
         for column in self.columns:
-            if isinstance(column['__col__'], ColumnProperty):
+            if isinstance(column["__col__"], ColumnProperty):
                 value = self._get_column_value(obj, column)
 
-            elif isinstance(column['__col__'], RelationshipProperty):
+            elif isinstance(column["__col__"], RelationshipProperty):
                 value = self._get_relationship_value(obj, column)
 
-            res[column['name']] = value
+            res[column["name"]] = value
 
         return res
 

@@ -14,8 +14,8 @@ from string import ascii_lowercase
 
 def force_ascii(value):
     """
-        Return enforced ascii string
-        éko=>ko
+    Return enforced ascii string
+    éko=>ko
     """
     if isinstance(value, bytes):
         value = force_string(value)
@@ -42,8 +42,8 @@ def force_encoding(value, encoding):
 
     if isinstance(value, str):
         value = value.encode(encoding)
-    elif encoding != 'utf-8':
-        value = value.decode('utf-8').encode(encoding)
+    elif encoding != "utf-8":
+        value = value.decode("utf-8").encode(encoding)
     return value
 
 
@@ -55,7 +55,7 @@ def force_string(value):
     :rtype: str
     """
     if isinstance(value, bytes):
-        value = value.decode('utf-8') 
+        value = value.decode("utf-8")
     elif not isinstance(value, str):
         value = str(value)
     return value
@@ -68,9 +68,11 @@ def camel_case_to_name(name):
     """
     Used to convert a classname to a lowercase name
     """
+
     def convert_func(val):
         return "_" + val.group(0).lower()
-    return name[0].lower() + re.sub(r'([A-Z])', convert_func, name[1:])
+
+    return name[0].lower() + re.sub(r"([A-Z])", convert_func, name[1:])
 
 
 def gen_random_string(size=15):
@@ -81,7 +83,7 @@ def gen_random_string(size=15):
 
             size of the resulting string
     """
-    return ''.join(random.choice(ascii_lowercase) for _ in range(size))
+    return "".join(random.choice(ascii_lowercase) for _ in range(size))
 
 
 def random_tag_id(size=15):

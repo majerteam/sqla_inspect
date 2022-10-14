@@ -33,6 +33,7 @@ class BaseSqlaInspector(object):
 
         Force the list of model attributes to use
     """
+
     def __init__(self, model, excludes=(), includes=(), **kw):
         self.inspector = inspect(model)
         self.excludes = excludes
@@ -48,15 +49,21 @@ class BaseSqlaInspector(object):
         """
         Return only the columns
         """
-        return [prop for prop in self.get_sorted_columns() \
-                if isinstance(prop, ColumnProperty)]
+        return [
+            prop
+            for prop in self.get_sorted_columns()
+            if isinstance(prop, ColumnProperty)
+        ]
 
     def get_relationships_only(self):
         """
         Return only the relationships
         """
-        return [prop for prop in self.get_sorted_columns() \
-                if isinstance(prop, RelationshipProperty)]
+        return [
+            prop
+            for prop in self.get_sorted_columns()
+            if isinstance(prop, RelationshipProperty)
+        ]
 
     @staticmethod
     def get_info_field(prop):
@@ -76,6 +83,7 @@ class Registry(dict):
     """
     A registry used to store sqla columns <-> datas association
     """
+
     def add_item(self, sqla_col_type, item, key_specific=None):
         """
         Add an item to the registry
@@ -95,10 +103,12 @@ class Registry(dict):
 
         return item
 
+
 class FormatterRegistry(Registry):
     """
     Registry specific to formatters
     """
+
     def add_formatter(self, sqla_col_type, formatter, key_specific=None):
         """
         Add a formatter to the registry
