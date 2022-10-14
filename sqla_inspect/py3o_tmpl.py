@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Odt content.xml template for py3o doc generation
 """

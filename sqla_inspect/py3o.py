@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # * Authors:
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
