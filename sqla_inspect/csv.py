@@ -17,7 +17,7 @@ from sqla_inspect.export import (
 )
 
 
-CSV_DELIMITER = ';'
+CSV_DELIMITER = ";"
 CSV_QUOTECHAR = '"'
 
 
@@ -30,6 +30,7 @@ class CsvWriter(object):
 
     rows are also stored as dicts in the form {'header': 'value}
     """
+
     delimiter = CSV_DELIMITER
     quotechar = CSV_QUOTECHAR
 
@@ -46,26 +47,34 @@ class CsvWriter(object):
         if f_buf is None:
             f_buf = io.StringIO()
 
-        headers = getattr(self, 'headers', ())
+        headers = getattr(self, "headers", ())
 
-        keys = [header['label'] for header in headers]
+        keys = [header["label"] for header in headers]
 
-        extra_headers = getattr(self, 'extra_headers', ())
-        keys.extend([header['label'] for header in extra_headers])
+        extra_headers = getattr(self, "extra_headers", ())
+        keys.extend([header["label"] for header in extra_headers])
 
         outfile = csv.DictWriter(
             f_buf,
             keys,
-            extrasaction='ignore',
+            extrasaction="ignore",
             delimiter=self.delimiter,
             quotechar=self.quotechar,
             quoting=csv.QUOTE_ALL,
         )
         outfile.writeheader()
-        _datas = getattr(self, '_datas', ())
+        _datas = getattr(self, "_datas", ())
         outfile.writerows(_datas)
         f_buf.seek(0)
         return f_buf
+
+    def format_cell(self, column_name: str, value: str):
+        """
+        Format a cell
+        """
+        if hasattr(self, "format_%s" % column_name):
+            value = getattr(self, "format_%s" % column_name)(value)
+        return value
 
     def format_row(self, row):
         """
@@ -77,16 +86,14 @@ class CsvWriter(object):
         instead of names
         """
         res_dict = {}
-        headers = getattr(self, 'headers', [])
-        extra_headers = getattr(self, 'extra_headers', [])
+        headers = getattr(self, "headers", [])
+        extra_headers = getattr(self, "extra_headers", [])
         for header in tuple(headers) + tuple(extra_headers):
-            name, label = header['name'], header['label']
+            name, label = header["name"], header["label"]
             val = row.get(name)
             if val is None:
                 continue
-            if hasattr(self, "format_%s" % name):
-                val = getattr(self, "format_%s" % name)(val)
-
+            val = self.format_cell(name, val)
             res_dict[label] = val
         return res_dict
 
@@ -98,10 +105,10 @@ class CsvWriter(object):
         mandatory : used for the export)
         """
         self.headers = []
-        if 'order' in self.options:
-            for element in self.options['order']:
+        if "order" in self.options:
+            for element in self.options["order"]:
                 for header in headers:
-                    if header['key'] == element:
+                    if header["key"] == element:
                         self.headers.append(header)
                         break
         else:
@@ -151,7 +158,8 @@ class SqlaCsvExporter(CsvWriter, SqlaExporter):
         You get a file buffer with the csv formatted datas
 
     """
-    config_key = 'csv'
+
+    config_key = "csv"
 
     def __init__(self, model, **kw):
         CsvWriter.__init__(self, **kw)
@@ -173,7 +181,7 @@ class SqlaCsvExporter(CsvWriter, SqlaExporter):
         # we will add datas starting from the last index
         for index, data in enumerate(extra_datas):
             header = self.extra_headers[index]
-            self._datas[-1][header['label']] = data
+            self._datas[-1][header["label"]] = data
 
 
 class CsvExporter(CsvWriter, BaseExporter):
@@ -188,6 +196,7 @@ class CsvExporter(CsvWriter, BaseExporter):
     writer.add_row({'key': u'La valeur de la cellule de la colonne 1'})
     writer.render()
     """
+
     headers = ()
 
     def __init__(self, **kw):
@@ -210,11 +219,10 @@ class CsvExporter(CsvWriter, BaseExporter):
         # we will add datas starting from the last index
         for index, data in enumerate(extra_datas):
             header = self.extra_headers[index]
-            self._datas[-1][header['label']] = data
+            self._datas[-1][header["label"]] = data
 
 
-def get_csv_reader(csv_buffer, delimiter=CSV_DELIMITER,
-                   quotechar=CSV_QUOTECHAR):
+def get_csv_reader(csv_buffer, delimiter=CSV_DELIMITER, quotechar=CSV_QUOTECHAR):
     return csv.DictReader(
         csv_buffer,
         delimiter=delimiter,

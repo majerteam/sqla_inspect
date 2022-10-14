@@ -37,6 +37,7 @@ class OdsWriter(object):
             list of dict containing the label of each column:
                 {'label': <a label>}
     """
+
     default_title = u"Export"
 
     def __init__(self, title=None, **kw):
@@ -67,16 +68,25 @@ class OdsWriter(object):
         f_buf.seek(0)
         return f_buf
 
+    def format_cell(self, column_name: str, value: str):
+        """
+        Format a cell
+        """
+        if hasattr(self, "format_%s" % column_name):
+            value = getattr(self, "format_%s" % column_name)(value)
+        return value
+
     def format_row(self, row):
         """
         The render method expects rows as lists, here we switch our row format
         from dict to list respecting the order of the headers
         """
         res = []
-        headers = getattr(self, 'headers', [])
+        headers = getattr(self, "headers", [])
         for column in headers:
-            column_name = column['name']
-            value = row.get(column_name, '')
+            column_name = column["name"]
+            value = row.get(column_name, "")
+            value = self.format_cell(column_name, value)
             res.append(value)
         return res
 
@@ -86,7 +96,7 @@ class OdsWriter(object):
 
         :param obj sheet: an odswriter Sheet object
         """
-        _datas = getattr(self, '_datas', ())
+        _datas = getattr(self, "_datas", ())
         sheet.writerows(_datas)
 
     def _render_headers(self, sheet):
@@ -95,10 +105,10 @@ class OdsWriter(object):
 
         :param obj sheet: an odswriter Sheet object
         """
-        headers = getattr(self, 'headers', ())
-        labels = [header['label'] for header in headers]
+        headers = getattr(self, "headers", ())
+        labels = [header["label"] for header in headers]
         extra_headers = getattr(self, "extra_headers", ())
-        labels.extend([header['label'] for header in extra_headers])
+        labels.extend([header["label"] for header in extra_headers])
         sheet.writerow(labels)
 
     def add_sheet(self, sheet_object):
@@ -121,10 +131,10 @@ class OdsWriter(object):
         Headers are filtered and ordered regarding the order option
         """
         self.headers = []
-        if 'order' in self.options:
-            for element in self.options['order']:
+        if "order" in self.options:
+            for element in self.options["order"]:
                 for header in headers:
-                    if header.get('key', header['label']) == element:
+                    if header.get("key", header["label"]) == element:
                         self.headers.append(header)
                         break
         else:
@@ -169,7 +179,8 @@ class SqlaOdsExporter(OdsWriter, SqlaExporter):
             a.add_row(i)
         file_buffer = a.render()
     """
-    config_key = 'ods'
+
+    config_key = "ods"
 
     def __init__(self, model, is_root=True, title=None, **kw):
         self.is_root = is_root
@@ -181,12 +192,12 @@ class SqlaOdsExporter(OdsWriter, SqlaExporter):
         returns an SqlaOdsExporter for the given related object and stores it in
         the column object as a cache
         """
-        result = column.get('sqla_ods_exporter')
+        result = column.get("sqla_ods_exporter")
         if result is None:
-            result = column['sqla_ods_exporter'] = SqlaOdsExporter(
+            result = column["sqla_ods_exporter"] = SqlaOdsExporter(
                 related_obj.__class__,
                 is_root=False,
-                title=column.get('label', column['key']),
+                title=column.get("label", column["key"]),
             )
             self.add_sheet(result)
         return result
@@ -198,13 +209,12 @@ class SqlaOdsExporter(OdsWriter, SqlaExporter):
         """
         val = SqlaExporter._get_relationship_cell_val(self, obj, column)
         if val == "":
-            related_key = column.get('related_key', None)
+            related_key = column.get("related_key", None)
 
-            if column['__col__'].uselist and related_key is None and \
-                    self.is_root:
+            if column["__col__"].uselist and related_key is None and self.is_root:
 
                 # on récupère les objets liés
-                key = column['key']
+                key = column["key"]
                 related_objects = getattr(obj, key, None)
                 if not related_objects:
                     return ""
@@ -227,6 +237,7 @@ class OdsExporter(OdsWriter, BaseExporter):
     writer.add_row({'key': u'La valeur de la cellule de la colonne 1'})
     writer.render()
     """
+
     headers = ()
 
     def __init__(self, title=None, **kw):

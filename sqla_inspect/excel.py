@@ -30,9 +30,9 @@ log = logging.getLogger(__name__)
 
 # A, B, C, ..., AA, AB, AC, ..., ZZ
 ASCII_UPPERCASE = list(ascii_uppercase) + list(
-    ''.join(duple)
+    "".join(duple)
     for duple in itertools.combinations_with_replacement(ascii_uppercase, 2)
-    )
+)
 
 # To be overriden by end user
 FORMAT_REGISTRY = Registry()
@@ -55,6 +55,7 @@ class XlsWriter(object):
                 {'label': <a label>}
 
     """
+
     title = u"Export"
 
     def __init__(self, worksheet=None, **kw):
@@ -94,18 +95,25 @@ class XlsWriter(object):
         """
         cell.font = Font(color=Color(rgb=color))
 
+    def format_cell(self, column_name: str, value: str):
+        """
+        Format a cell
+        """
+        if hasattr(self, "format_%s" % column_name):
+            value = getattr(self, "format_%s" % column_name)(value)
+        return value
+
     def format_row(self, row):
         """
         The render method expects rows as lists, here we switch our row format
         from dict to list respecting the order of the headers
         """
         res = []
-        headers = getattr(self, 'headers', [])
+        headers = getattr(self, "headers", [])
         for column in headers:
-            column_name = column['name']
-            value = row.get(column_name, '')
-            if hasattr(self, "format_%s" % column_name):
-                value = getattr(self, "format_%s" % column_name)(value)
+            column_name = column["name"]
+            value = row.get(column_name, "")
+            value = self.format_cell(value)
             res.append(value)
         return res
 
@@ -131,8 +139,8 @@ class XlsWriter(object):
         """
         Render the rows in the current stylesheet
         """
-        _datas = getattr(self, '_datas', ())
-        headers = getattr(self, 'headers', ())
+        _datas = getattr(self, "_datas", ())
+        headers = getattr(self, "headers", ())
         for index, row in enumerate(_datas):
             row_number = index + 2
             for col_num, value in enumerate(row):
@@ -151,18 +159,18 @@ class XlsWriter(object):
         """
         Write the headers row
         """
-        headers = getattr(self, 'headers', ())
+        headers = getattr(self, "headers", ())
         for index, col in enumerate(headers):
             # We write the headers
             cell = self.worksheet.cell(row=1, column=index + 1)
-            cell.value = col['label']
+            cell.value = col["label"]
 
         index += 1
 
-        extra_headers = getattr(self, 'extra_headers', ())
+        extra_headers = getattr(self, "extra_headers", ())
         for add_index, col in enumerate(extra_headers):
             cell = self.worksheet.cell(row=1, column=add_index + index + 1)
-            cell.value = col['label']
+            cell.value = col["label"]
 
     def set_title(self, title):
         self.worksheet.title = title
@@ -176,10 +184,10 @@ class XlsWriter(object):
         Headers are filtered and ordered regarding the order option
         """
         self.headers = []
-        if 'order' in self.options:
-            for element in self.options['order']:
+        if "order" in self.options:
+            for element in self.options["order"]:
                 for header in headers:
-                    if header.get('key', header['label']) == element:
+                    if header.get("key", header["label"]) == element:
                         self.headers.append(header)
                         break
         else:
@@ -193,13 +201,13 @@ def get_cell_format(column_dict, key=None):
     :param column_dict: The column datas collected during inspection
     :param key: The exportation key
     """
-    format = column_dict.get('format')
-    prop = column_dict.get('__col__')
+    format = column_dict.get("format")
+    prop = column_dict.get("__col__")
 
     if format is None and prop is not None:
-        if hasattr(prop, 'columns'):
+        if hasattr(prop, "columns"):
             sqla_column = prop.columns[0]
-            column_type = getattr(sqla_column.type, 'impl', sqla_column.type)
+            column_type = getattr(sqla_column.type, "impl", sqla_column.type)
             format = FORMAT_REGISTRY.get_item(column_type)
     return format
 
@@ -242,17 +250,13 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
             a.add_row(i)
         a.render()
     """
-    config_key = 'excel'
+
+    config_key = "excel"
 
     def __init__(self, model, guess_types=True, worksheet=None, **kw):
         self.guess_types = guess_types
         self.is_root = worksheet is None
-        XlsWriter.__init__(
-            self,
-            guess_types=guess_types,
-            worksheet=worksheet,
-            **kw
-        )
+        XlsWriter.__init__(self, guess_types=guess_types, worksheet=worksheet, **kw)
         SqlaExporter.__init__(self, model=model, **kw)
 
     def _get_related_exporter(self, related_obj, column):
@@ -260,14 +264,13 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
         returns an SqlaXlsExporter for the given related object and stores it
         in the column object as a cache
         """
-        result = column.get('sqla_xls_exporter')
+        result = column.get("sqla_xls_exporter")
         if result is None:
             worksheet = self.book.create_sheet(
-                title=column.get('label', 'default title')
+                title=column.get("label", "default title")
             )
-            result = column['sqla_xls_exporter'] = SqlaXlsExporter(
-                related_obj.__class__,
-                worksheet=worksheet
+            result = column["sqla_xls_exporter"] = SqlaXlsExporter(
+                related_obj.__class__, worksheet=worksheet
             )
         return result
 
@@ -278,13 +281,12 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
         """
         val = SqlaExporter._get_relationship_cell_val(self, obj, column)
         if val == "":
-            related_key = column.get('related_key', None)
+            related_key = column.get("related_key", None)
 
-            if column['__col__'].uselist and related_key is None \
-                    and self.is_root:
+            if column["__col__"].uselist and related_key is None and self.is_root:
 
                 # on récupère les objets liés
-                key = column['key']
+                key = column["key"]
                 related_objects = getattr(obj, key, None)
                 if not related_objects:
                     return ""
@@ -305,7 +307,7 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
         XlsWriter._populate(self)
         for header in self.headers:
             if "sqla_xls_exporter" in header:
-                header['sqla_xls_exporter']._populate()
+                header["sqla_xls_exporter"]._populate()
 
 
 class XlsExporter(XlsWriter, BaseExporter):
@@ -316,12 +318,9 @@ class XlsExporter(XlsWriter, BaseExporter):
     writer.add_row({'key': u'La valeur de la cellule de la colonne 1'})
     writer.render()
     """
+
     headers = ()
 
     def __init__(self, guess_types=True, **kw):
-        XlsWriter.__init__(
-            self,
-            guess_types=guess_types,
-            **kw
-        )
+        XlsWriter.__init__(self, guess_types=guess_types, **kw)
         BaseExporter.__init__(self, **kw)
