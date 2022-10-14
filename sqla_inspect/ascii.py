@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # * Authors:
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
@@ -30,7 +29,7 @@ def force_utf8(value):
     :param str value:
     :rtype: bytes
     """
-    return force_encoding(value)
+    return force_encoding(value, 'utf-8')
 
 
 def force_encoding(value, encoding):
