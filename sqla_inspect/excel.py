@@ -113,7 +113,7 @@ class XlsWriter(object):
         for column in headers:
             column_name = column["name"]
             value = row.get(column_name, "")
-            value = self.format_cell(value)
+            value = self.format_cell(column_name, value)
             res.append(value)
         return res
 
