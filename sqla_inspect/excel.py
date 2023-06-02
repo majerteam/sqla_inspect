@@ -77,7 +77,13 @@ class XlsWriter(object):
         """
         if f_buf is None:
             f_buf = io.BytesIO()
-        f_buf.write(openpyxl.writer.excel.save_virtual_workbook(self.book))
+
+        if hasattr(self.book, "save"):
+            self.book.save(f_buf)
+        # older versions of openpyxl
+        else:
+            f_buf.write(openpyxl.writer.excel.save_virtual_workbook(self.book))
+
         f_buf.seek(0)
         return f_buf
 

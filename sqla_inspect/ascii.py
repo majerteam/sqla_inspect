@@ -29,7 +29,7 @@ def force_utf8(value):
     :param str value:
     :rtype: bytes
     """
-    return force_encoding(value, 'utf-8')
+    return force_encoding(value, "utf-8")
 
 
 def force_encoding(value, encoding):
