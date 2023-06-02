@@ -166,6 +166,7 @@ class XlsWriter(object):
         Write the headers row
         """
         headers = getattr(self, "headers", ())
+        index = 0
         for index, col in enumerate(headers):
             # We write the headers
             cell = self.worksheet.cell(row=1, column=index + 1)
