@@ -32,6 +32,7 @@ class CsvWriter(object):
 
     delimiter = CSV_DELIMITER
     quotechar = CSV_QUOTECHAR
+    quoting = csv.QUOTE_ALL
 
     def __init__(self, **kw):
         self.options = kw
@@ -59,7 +60,7 @@ class CsvWriter(object):
             extrasaction="ignore",
             delimiter=self.delimiter,
             quotechar=self.quotechar,
-            quoting=csv.QUOTE_ALL,
+            quoting=self.quoting,
         )
         outfile.writeheader()
         _datas = getattr(self, "_datas", ())
