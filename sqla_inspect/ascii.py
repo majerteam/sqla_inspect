@@ -3,12 +3,14 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 #       * TJEBBES Gaston <g.t@majerti.fr>
 """
-    Provide common tools for string handling
+Provide common tools for string handling
 """
-import re
-from unidecode import unidecode
+
 import random
+import re
 from string import ascii_lowercase
+
+from unidecode import unidecode
 
 
 def force_ascii(value):

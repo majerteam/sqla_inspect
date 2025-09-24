@@ -8,7 +8,7 @@ from sqla_inspect import ascii
 
 def test_force_unicode():
     assert ascii.force_unicode("éko") == "éko"
-    assert ascii.force_unicode("éko".encode("utf-8")) == u"éko"
+    assert ascii.force_unicode("éko".encode("utf-8")) == "éko"
 
 
 def test_force_utf8():

@@ -3,10 +3,11 @@
 #       * Miotte Julien <j.m@majerti.fr>;
 #       * TJEBBES Gaston <g.t@majerti.fr>
 """
-    Csv exporter for sqlalchemy datas
+Csv exporter for sqlalchemy datas
 
-    uses the sqlalchemy info attr to retrieve meta datas about the columns
+uses the sqlalchemy info attr to retrieve meta datas about the columns
 """
+
 import csv
 import io
 
@@ -14,7 +15,6 @@ from sqla_inspect.export import (
     BaseExporter,
     SqlaExporter,
 )
-
 
 CSV_DELIMITER = ";"
 CSV_QUOTECHAR = '"'

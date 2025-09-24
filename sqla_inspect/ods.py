@@ -5,15 +5,17 @@
 """
 Ods exportation module
 """
-import logging
-import odswriter
-import io
 
+import io
+import logging
+
+import odswriter
+
+from sqla_inspect.base import Registry
 from sqla_inspect.export import (
     BaseExporter,
     SqlaExporter,
 )
-from sqla_inspect.base import Registry
 
 log = logging.getLogger(__name__)
 # To be overriden by end user
@@ -37,7 +39,7 @@ class OdsWriter(object):
                 {'label': <a label>}
     """
 
-    default_title = u"Export"
+    default_title = "Export"
 
     def __init__(self, title=None, **kw):
         self.sheets = []
@@ -211,7 +213,6 @@ class SqlaOdsExporter(OdsWriter, SqlaExporter):
             related_key = column.get("related_key", None)
 
             if column["__col__"].uselist and related_key is None and self.is_root:
-
                 # on récupère les objets liés
                 key = column["key"]
                 related_objects = getattr(obj, key, None)

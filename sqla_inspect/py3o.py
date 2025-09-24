@@ -10,27 +10,27 @@ Py3o exporters
 >>> template = Template.query().first()
 >>> odt_file_datas = compile_template(model, template.data_obj)
 """
-from __future__ import absolute_import
-from io import BytesIO
 
+from __future__ import absolute_import
+
+from io import BytesIO
 from xml.sax.saxutils import escape
 
+from genshi.core import Markup
+from py3o.template import Template
 from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
-from genshi.core import Markup
 
-from py3o.template import Template
-
+from sqla_inspect.ascii import (
+    force_unicode,
+)
 from sqla_inspect.base import (
     BaseSqlaInspector,
 )
 from sqla_inspect.export import (
     format_value,
-)
-from sqla_inspect.ascii import (
-    force_unicode,
 )
 from sqla_inspect.py3o_tmpl import CONTENT_TMPL
 
@@ -43,7 +43,7 @@ def format_py3o_val(value):
     """
     value = force_unicode(value)
     value = escape(value)
-    value = value.replace(u"\n", u"<text:line-break/>")
+    value = value.replace("\n", "<text:line-break/>")
     return Markup(value)
 
 
@@ -112,7 +112,6 @@ class SqlaContext(BaseSqlaInspector):
         """
         res = []
         for prop in self.get_sorted_columns():
-
             info_dict = self.get_info_field(prop)
             export_infos = info_dict.get("export", {}).copy()
 
@@ -178,16 +177,15 @@ class SqlaContext(BaseSqlaInspector):
                     subres = column["__prop__"].make_doc()
 
                     for subkey, value in subres.items():
-                        new_key = u"%s.first.%s" % (key, subkey)
-                        res[new_key] = u"%s - %s (premier élément)" % (label, value)
-                        new_key = u"%s.last.%s" % (key, subkey)
-                        res[new_key] = u"%s - %s (dernier élément)" % (label, value)
+                        new_key = "%s.first.%s" % (key, subkey)
+                        res[new_key] = "%s - %s (premier élément)" % (label, value)
+                        new_key = "%s.last.%s" % (key, subkey)
+                        res[new_key] = "%s - %s (dernier élément)" % (label, value)
                 else:
-
                     subres = column["__prop__"].make_doc()
                     for subkey, value in subres.items():
-                        new_key = u"%s.%s" % (key, subkey)
-                        res[new_key] = u"%s - %s" % (label, value)
+                        new_key = "%s.%s" % (key, subkey)
+                        res[new_key] = "%s - %s" % (label, value)
 
         print("------------------ Rendering the docs -------------------")
         keys = res.keys()
@@ -195,7 +193,7 @@ class SqlaContext(BaseSqlaInspector):
         for key in keys:
             value = res[key]
 
-            print(u"{0} : py3o.{1}".format(value, key))
+            print("{0} : py3o.{1}".format(value, key))
 
         return res
 

@@ -2,20 +2,18 @@
 #       * Arezki Feth <f.a@majerti.fr>;
 #       * Miotte Julien <j.m@majerti.fr>;
 #       * TJEBBES Gaston <g.t@majerti.fr>
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
     Column,
+    Date,
     ForeignKey,
     Integer,
-    Date,
     Unicode,
 )
-
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (
-    relationship,
     backref,
+    relationship,
 )
-
 
 Base = declarative_base()
 
@@ -41,7 +39,7 @@ class Child(Base):
 
     parent_id = Column(ForeignKey(Parent.id))
     parent = relationship(
-        Parent, backref="children", info={"export": {"label": u"Parent"}}
+        Parent, backref="children", info={"export": {"label": "Parent"}}
     )
 
     friend_id = Column(ForeignKey(Friend.id))

@@ -7,23 +7,23 @@
 Excel exportation module
 """
 
+import io
 import itertools
 import logging
+from string import ascii_uppercase
+
 import openpyxl
 from openpyxl.styles import (
     Color,
     Font,
 )
+from openpyxl.utils import get_column_letter
 
-import io
-from string import ascii_uppercase
-
+from sqla_inspect.base import Registry
 from sqla_inspect.export import (
     BaseExporter,
     SqlaExporter,
 )
-from sqla_inspect.base import Registry
-
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +36,13 @@ ASCII_UPPERCASE = list(ascii_uppercase) + list(
 
 # To be overriden by end user
 FORMAT_REGISTRY = Registry()
+
+
+def force_text(value):
+    if value is None:
+        return ""
+    else:
+        return str(value)
 
 
 class XlsWriter(object):
@@ -56,7 +63,7 @@ class XlsWriter(object):
 
     """
 
-    title = u"Export"
+    title = "Export"
 
     def __init__(self, worksheet=None, **kw):
         if worksheet is None:
@@ -138,6 +145,11 @@ class XlsWriter(object):
         methods
         """
         self._populate()
+
+        for column_cells in self.worksheet.columns:
+            length = max(len(force_text(cell.value)) for cell in column_cells)
+            letter = get_column_letter(column_cells[0].column)
+            self.worksheet.column_dimensions[letter].width = length * 1.23
 
         return self.save_book(f_buf)
 
@@ -291,7 +303,6 @@ class SqlaXlsExporter(XlsWriter, SqlaExporter):
             related_key = column.get("related_key", None)
 
             if column["__col__"].uselist and related_key is None and self.is_root:
-
                 # on récupère les objets liés
                 key = column["key"]
                 related_objects = getattr(obj, key, None)

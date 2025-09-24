@@ -5,12 +5,14 @@
 """
 Base export class
 """
+
 import logging
 
 from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
+
 from sqla_inspect.base import (
     BaseSqlaInspector,
     FormatterRegistry,
@@ -203,7 +205,6 @@ class SqlaExporter(BaseExporter, BaseSqlaInspector):
         res = []
 
         for prop in self.get_sorted_columns():
-
             main_infos = self._get_prop_infos(prop)
 
             if self._is_excluded(prop, main_infos):
@@ -280,7 +281,7 @@ about a relationship"
                     if self._is_excluded(column, infos):
                         continue
 
-                    infos["label"] = u"%s %s" % (main_infos["label"], infos["label"])
+                    infos["label"] = "%s %s" % (main_infos["label"], infos["label"])
                     infos["__col__"] = main_infos["__col__"]
                     infos["name"] = "%s %s" % (main_infos["name"], column.key)
                     infos["key"] = main_infos["key"]
@@ -345,7 +346,6 @@ about a relationship"
         """
         row = {}
         for column in self.headers:
-
             value = ""
 
             if "__col__" in column:

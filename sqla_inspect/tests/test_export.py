@@ -8,7 +8,7 @@ from sqla_inspect import export
 
 
 def test_collect_keys():
-    from sqla_inspect.tests.models import Parent, Child
+    from sqla_inspect.tests.models import Child, Parent
 
     exporter = export.SqlaExporter(Parent)
     assert len(exporter.headers) == 3
@@ -39,25 +39,25 @@ def test_collect_keys():
 
 
 def test_format_entry():
-    from sqla_inspect.tests.models import Parent, Child, Friend
+    from sqla_inspect.tests.models import Child, Friend, Parent
 
     exporter = export.SqlaExporter(Child)
 
     model = Child(
-        name=u"Éric",
+        name="Éric",
         password="secret",
         id=5,
         parent_id=4,
-        parent=Parent(id=4, name=u"Amédé"),
+        parent=Parent(id=4, name="Amédé"),
     )
     exporter.add_row(model)
 
     row_datas = exporter._datas[0]
 
     assert row_datas["id"] == 5
-    assert row_datas["name"] == u"Éric"
+    assert row_datas["name"] == "Éric"
     assert row_datas["parent_id"] == 4
-    assert row_datas["parent name"] == u"Amédé"
+    assert row_datas["parent name"] == "Amédé"
     assert row_datas["parent id"] == 4
 
     model.friend = Friend(
@@ -69,4 +69,4 @@ def test_format_entry():
 
     row_datas = exporter._datas[1]
 
-    assert row_datas["friend"] == u"Jane"
+    assert row_datas["friend"] == "Jane"

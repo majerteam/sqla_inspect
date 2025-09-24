@@ -6,12 +6,13 @@
 """
 utilities to inspect Sqlalchemy models
 """
+
+from colanderalchemy.schema import _creation_order
 from sqlalchemy import inspect
 from sqlalchemy.orm import (
     ColumnProperty,
     RelationshipProperty,
 )
-from colanderalchemy.schema import _creation_order
 
 
 class BaseSqlaInspector(object):
