@@ -1,3 +1,8 @@
+0.9 19/01/2026
+==============
+
+* Ensure data encoding when producing Excel Spreadsheets. The Xlsx specifications forbid the use of some specific characters in cell values, thoses are now removed from the output.
+
 0.8 24/09/2025
 ==============
 
