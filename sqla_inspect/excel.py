@@ -10,6 +10,7 @@ Excel exportation module
 import io
 import itertools
 import logging
+import re
 from string import ascii_uppercase
 
 import openpyxl
@@ -18,6 +19,7 @@ from openpyxl.styles import (
     Font,
 )
 from openpyxl.utils import get_column_letter
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 
 from sqla_inspect.base import Registry
 from sqla_inspect.export import (
@@ -164,6 +166,8 @@ class XlsWriter(object):
             for col_num, value in enumerate(row):
                 cell = self.worksheet.cell(row=row_number, column=col_num + 1)
                 if value is not None:
+                    if isinstance(value, str):
+                        value = ILLEGAL_CHARACTERS_RE.sub(r"", value)
                     cell.value = value
                 else:
                     cell.value = ""
